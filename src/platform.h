@@ -8,8 +8,6 @@
 #ifndef SUIKA_PLATFORM_H
 #define SUIKA_PLATFORM_H
 
-#include <stdio.h>
-
 #include "types.h"
 
 /* イメージ */
