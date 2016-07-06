@@ -395,7 +395,6 @@ int main()
         [NSApp activateIgnoringOtherApps:YES];
         [NSApp run];
 
-
         // コンフィグの終了処理を行う
         cleanup_conf();
         
@@ -487,7 +486,7 @@ bool log_info(const char *s, ...)
 }
 
 //
-// WARN
+// WARNログを出力する
 //
 bool log_warn(const char *s, ...)
 {
@@ -510,7 +509,7 @@ bool log_warn(const char *s, ...)
 }
 
 //
-// Error
+// Errorログを出力する
 //
 bool log_error(const char *s, ...)
 {
