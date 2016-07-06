@@ -64,8 +64,8 @@ struct insn_item {
 /*
  * コマンド実行ポインタ
  */
-char *cur_script;
-int cur_index;
+static char *cur_script;
+static int cur_index;
 
 /*
  * 前方参照
