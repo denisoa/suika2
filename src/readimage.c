@@ -11,7 +11,7 @@
 #include "suika.h"
 
 /*
- * ローカル変数
+ * ファイルスコープ変数
  */
 static struct rfile *rf;
 static png_structp png_ptr;
