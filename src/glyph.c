@@ -1,0 +1,390 @@
+﻿/* -*- coding: utf-8-with-signature; indent-tabs-mode: t; tab-width: 8; c-basic-offset: 8; -*- */
+
+/*
+ * Suika 2
+ * Copyright (C) 2001-2016, TABATA Keiichi. All rights reserved.
+ */
+
+/*
+ * freetype2 レンダリング
+ *
+ * [Changes]
+ *  - 2016/06/18 作成
+ */
+
+#include "suika.h"
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#include <freetype/ftsynth.h>
+
+#define SCALE	(64)
+
+static FT_Library library;
+static FT_Face face;
+
+/*
+ * 前方参照
+ */
+static void draw_glyph_func(unsigned char * RESTRICT font, int font_width,
+			    int font_height, int margin_left, int margin_top,
+			    pixel_t * RESTRICT image, int image_width,
+			    int image_height, int image_x, int image_y,
+			    pixel_t color);
+
+/*
+ * フォントレンダラの初期化処理を行う
+ */
+bool init_glyph(void)
+{
+	char *path;
+	FT_Error err;
+
+	/* FreeType2ライブラリを初期化する */
+	err = FT_Init_FreeType(&library);
+	if (err != 0) {
+		log_api_error("FT_Init_FreeType");
+		return false;
+	}
+
+	/* フォントファイルのパスを生成する */
+	path = make_valid_path(FONT_DIR, conf_font_file);
+	if (path == NULL) {
+		log_memory();
+		return false;
+	}
+
+	/* フォントファイルを読み込む */
+	err = FT_New_Face(library, path, 0, &face);
+	if (err != 0) {
+		log_font_file_error(conf_font_file);
+		free(path);
+		return false;
+	}
+	free(path);
+
+	/* 文字サイズをセットする */
+	err = FT_Set_Pixel_Sizes(face, 0, (FT_UInt)conf_font_size);
+	if (err != 0) {
+		log_api_error("FT_Set_Pixel_Sizes");
+		return false;
+	}
+
+	/* 成功 */
+	return true;
+}
+
+/*
+ * フォントレンダラの終了処理を行う
+ */
+void cleanup_glyph(void)
+{
+	FT_Done_Face(face);
+	FT_Done_FreeType(library);
+}
+
+/*
+ * utf-8文字列の先頭文字をutf-32文字に変換する
+ * FIXME: サロゲートペア、合字
+ */
+int utf8_to_utf32(const char *mbs, uint32_t *wc)
+{
+	size_t mbslen, octets, i;
+	uint32_t ret;
+
+	assert(mbs != NULL);
+
+	/* 変換元がNULLか長さが0の場合 */
+	mbslen = strlen(mbs);
+	if(mbslen == 0)
+		return 0;
+
+	/* 1バイト目をチェックしてオクテット数を求める */
+	if(mbs[0] == '\0')
+		octets = 0;
+	else if((mbs[0] & 0x80) == 0)
+		octets = 1;
+	else if((mbs[0] & 0xe0) == 0x0c)
+		octets = 2;
+	else if((mbs[0] & 0xf0) == 0xe0)
+		octets = 3;
+	else if((mbs[0] & 0xf8) == 0xf0)
+		octets = 4;
+	else
+		return -1;	/* 解釈できない */
+
+	/* sの長さをチェックする */
+	if(mbslen < octets)
+		return -1;	/* mbsの長さが足りない */
+
+	/* 2-4バイト目をチェックする */
+	for (i = 1; i < octets; i++) {
+		if((mbs[i] & 0xc0) != 0x80)
+			return -1;	/* 解釈できないバイトである */
+	}
+
+	/* 各バイトを合成してUTF-32文字を求める */
+	switch(octets) {
+	case 0:
+		ret = 0;
+		break;
+	case 1:
+		ret = (uint32_t)mbs[0];
+		break;
+	case 2:
+		ret = (uint32_t)(((mbs[0] & 0x1f) << 6) |
+				 (mbs[1] & 0x3f));
+		break;
+	case 3:
+		ret = (uint32_t)(((mbs[0] & 0x0f) << 12) |
+				 ((mbs[1] & 0x3f) << 6) |
+				 (mbs[2] & 0x3f));
+		break;
+	case 4:
+		ret = (uint32_t)(((mbs[0] & 0x07) << 18) |
+				 ((mbs[1] & 0x3f) << 12) |
+				 ((mbs[2] & 0x3f) << 6) |
+				 (mbs[3] & 0x3f));
+		break;
+	default:
+		/* never come here */
+		assert(0);
+		return -1;
+	}
+
+	/* 結果を格納する */
+	if(wc != NULL)
+		*wc = ret;
+
+	/* 消費したオクテット数を返す */
+	return (int)octets;
+}
+
+/*
+ * utf-8文字列の文字数を返す
+ */
+int utf8_chars(const char *mbs)
+{
+	int count;
+	int mblen;
+
+	count = 0;
+	while (*mbs != '\0') {
+		mblen = utf8_to_utf32(mbs, NULL);
+		if (mblen == -1)
+			return -1;
+		count++;
+		mbs += mblen;
+	}
+	return count;
+}
+
+/*
+ * 文字を描画した際の幅を取得する
+ */
+int get_glyph_width(uint32_t codepoint)
+{
+	FT_Error err;
+
+	/* 文字をロードする */
+	/* FIXME: FT_LOAD_RENDER以外のオプションにできるか？ */
+	err = FT_Load_Char(face, codepoint, FT_LOAD_RENDER);
+	if (err != 0) {
+		log_api_error("FT_Load_Char");
+		return -1;
+	}
+
+	/* 幅を求める */
+	return (int)face->glyph->advance.x / SCALE;
+}
+
+/*
+ * utf-8文字列を描画した際の幅を取得する
+ */
+int get_utf8_width(const char *mbs)
+{
+	uint32_t c;
+	int mblen, w;
+
+	/* 1文字ずつ描画する */
+	w = 0;
+	c = 0; /* warning avoidance on gcc 5.3.1 */
+	while (*mbs != '\0') {
+		/* 文字を取得する */
+		mblen = utf8_to_utf32(mbs, &c);
+		if (mblen == -1)
+			return -1;
+
+		/* 幅を取得する */
+		w += get_glyph_width(c);
+
+		/* 次の文字へ移動する */
+		mbs += mblen;
+	}
+	return w;
+}
+
+/*
+ * 文字の描画を行う
+ */
+bool draw_glyph(struct image *img, int x, int y, pixel_t color,
+		uint32_t codepoint, int *w, int *h)
+{
+	FT_Error err;
+	int descent;
+
+	/* 文字をグレースケールビットマップとして取得する */
+	err = FT_Load_Char(face, codepoint, FT_LOAD_RENDER);
+	if (err != 0) {
+		log_api_error("FT_Load_Char");
+		return false;
+	}
+
+	/* 文字のビットマップを対象イメージに描画する */
+	if (img != NULL) {
+		draw_glyph_func(face->glyph->bitmap.buffer,
+				(int)face->glyph->bitmap.width,
+				(int)face->glyph->bitmap.rows,
+				face->glyph->bitmap_left,
+				conf_font_size - face->glyph->bitmap_top,
+				img->pixels,
+				img->width,
+				img->height,
+				x,
+				y,
+				color);
+	}
+
+	/* descentを求める */
+	descent = (int)(face->glyph->metrics.height / SCALE) -
+		  (int)(face->glyph->metrics.horiBearingY / SCALE);
+
+	/* 描画した幅と高さを求める */
+	*w = (int)face->glyph->advance.x / SCALE;
+	*h = conf_font_size + descent;
+
+	/* 成功 */
+	return true;
+}
+
+/*
+ * SSEバージョニングを行わない場合
+ */
+#ifndef SSE_VERSIONING
+
+#define DRAW_GLYPH_FUNC draw_glyph_func
+#include "drawglyph.h"
+
+/*
+ * SSEバージョニングを行う場合
+ */
+#else
+
+/* AVX-512版の描画関数を宣言する */
+#define PROTOTYPE_ONLY
+#define DRAW_GLYPH_FUNC draw_glyph_func_avx512
+#include "drawglyph.h"
+
+/* AVX2版の描画関数を宣言する */
+#define PROTOTYPE_ONLY
+#define DRAW_GLYPH_FUNC draw_glyph_func_avx2
+#include "drawglyph.h"
+
+/* AVX版の描画関数を宣言する */
+#define PROTOTYPE_ONLY
+#define DRAW_GLYPH_FUNC draw_glyph_func_avx
+#include "drawglyph.h"
+
+/* SSE4.2版の描画関数を宣言する */
+#define PROTOTYPE_ONLY
+#define DRAW_GLYPH_FUNC draw_glyph_func_sse42
+#include "drawglyph.h"
+
+/* SSE4.1版の描画関数を宣言する */
+#define PROTOTYPE_ONLY
+#define DRAW_GLYPH_FUNC draw_glyph_func_sse41
+#include "drawglyph.h"
+
+/* SSE3版の描画関数を宣言する */
+#define PROTOTYPE_ONLY
+#define DRAW_GLYPH_FUNC draw_glyph_func_sse3
+#include "drawglyph.h"
+
+/* SSE2版の描画関数を宣言する */
+#define PROTOTYPE_ONLY
+#define DRAW_GLYPH_FUNC draw_glyph_func_sse2
+#include "drawglyph.h"
+
+/* SSE版の描画関数を宣言する */
+#define PROTOTYPE_ONLY
+#define DRAW_GLYPH_FUNC draw_glyph_func_sse
+#include "drawglyph.h"
+
+/* 非ベクトル化版の描画関数を宣言する */
+#define PROTOTYPE_ONLY
+#define DRAW_GLYPH_FUNC draw_glyph_func_novec
+#include "drawglyph.h"
+
+/* draw_glyph_func()をディスパッチする */
+void draw_glyph_func(unsigned char * RESTRICT font,
+		     int font_width,
+		     int font_height,
+		     int margin_left,
+		     int margin_top,
+		     pixel_t * RESTRICT image,
+		     int image_width,
+		     int image_height,
+		     int image_x,
+		     int image_y,
+		     pixel_t color)
+{
+	if (has_avx512) {
+		draw_glyph_func_avx512(font, font_width, font_height,
+				       margin_left, margin_top, image,
+				       image_width, image_height, image_x,
+				       image_y, color);
+	} else if (has_avx2) {
+		draw_glyph_func_avx2(font, font_width, font_height,
+				     margin_left, margin_top, image,
+				     image_width, image_height, image_x,
+				     image_y, color);
+	} else if (has_avx) {
+		draw_glyph_func_avx(font, font_width, font_height,
+				    margin_left, margin_top, image,
+				    image_width, image_height, image_x,
+				    image_y, color);
+	} else if (has_sse42) {
+		draw_glyph_func_sse42(font, font_width, font_height,
+				      margin_left, margin_top, image,
+				      image_width, image_height, image_x,
+				      image_y, color);
+	} else if (has_sse41) {
+		draw_glyph_func_sse41(font, font_width, font_height,
+				      margin_left, margin_top, image,
+				      image_width, image_height, image_x,
+				      image_y, color);
+	} else if (has_sse3) {
+		draw_glyph_func_sse3(font, font_width, font_height,
+				     margin_left, margin_top, image,
+				     image_width, image_height, image_x,
+				     image_y, color);
+	} else if (has_sse2) {
+		draw_glyph_func_sse2(font, font_width, font_height,
+				     margin_left, margin_top, image,
+				     image_width, image_height, image_x,
+				     image_y, color);
+	} else if (has_sse) {
+		draw_glyph_func_sse(font, font_width, font_height,
+				    margin_left, margin_top, image,
+				    image_width, image_height, image_x,
+				    image_y, color);
+	} else {
+		draw_glyph_func_novec(font, font_width, font_height,
+				      margin_left, margin_top, image,
+				      image_width, image_height, image_x,
+				      image_y, color);
+	}
+}
+
+#endif
+

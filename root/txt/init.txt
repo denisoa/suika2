@@ -1,0 +1,132 @@
+###
+### ロゴ
+###
+
+@ch c suika.png 1.0
+@se suika.ogg
+@wait 2.0
+@ch c none 1.0
+
+###
+### メニュー
+###
+
+@bg menu.png 1.0
+@bgm 00.ogg
+
+:MENU
+@menu menu.png menu_selected.png START 945 339 300 90 LOAD 990 462 260 80 QUIT 1004 569 244 91
+
+:START
+@goto SCENE1
+
+:LOAD
+@goto $LOAD
+@goto MENU
+
+###
+### シーン1
+###
+
+:SCENE1
+
+@bgm 01.ogg
+@bg house.png 1.0
+@ch c 001-fun.png 1.0
+#@ch c 001-shadow.png 1.0
+
+*すいか*みなさま、こんにちは。Suika 2をご利用いただきありがとうございます。
+*すいか*Suika 2は、アドベンチャーゲーム制作ツールです。ただいま公開テストを行っております。
+*すいか*Suika 2は、みなさまのPC、Macにインストールしてご利用いただけます。
+*すいか*再配布、改変は自由で、制限はありません。商用利用についても、何の制限も無く可能です。
+
+###
+### シーン2
+###
+
+@ch c 001-happy.png 1.0
+#@ch c 001-shadow.png 1.0
+*すいか*質問はありますか？
+@ch c none 1.0
+
+:LOOP1
+@select L1_MAC L1_ADVANTAGE L1_NEXT 本当にMacでも動くの？ 何が強みなの？ 次へ
+
+:L1_MAC
+WindowsアプリとMacアプリが用意されており、どちらでも同じように動きます。
+Windowsアプリは、Windows XP/7/10で動くことを確認しています。
+Macアプリは、Mac OS X 10.11 El Capitanで動作することを確認しています。
+さらにいうと、Linuxでも動きます。Suika 2はほとんどLinux上で開発されています。
+@set $1 = 1
+@goto LOOP1
+
+:L1_ADVANTAGE
+Suika 2の強みは、さまざまな環境で動作することです。
+特に、仮想マシンでの動作を意識しており、仮想マシンでは動作が難しいGPUアクセラレーションを使っていません。
+そのかわり、どの世代のCPUで実行しても、そのCPUの能力をフル活用できるように、特殊な最適化を行っています。
+@set $2 = 1
+@goto LOOP1
+
+:L1_NEXT
+
+###
+### シーン3
+###
+
+@bgm 02.ogg
+@bg room.png 1.0
+@ch c 001-happy.png 1.0
+#@ch c 001-shadow.png 1.0
+*すいか*ほかにも質問はありますか？
+@ch c none 1.0
+
+:LOOP2
+@select L2_OLD L2_CUSTOMIZE L2_NEXT Suika1もあるの？ カスタマイズできるの？ 次へ
+
+:L2_OLD
+2.0より前のバージョンは、西瓜Studioというソフトでした。2001年から2003年にかけて、作者が高校生の頃に開発・公開されていました。
+2.0以降は、エディタの機能を削ったため、Studioの名前を外しました。
+西瓜Studio Ver.0.47が、ベクター様のサイトにまだ残っているので、興味があれば探してみて下さい。
+@set $3 = 1
+@goto LOOP2
+
+:L2_CUSTOMIZE
+フォント、メッセージボックス、セーブ画面など、基本的にはすべてカスタマイズが可能です。
+やり方は、cgフォルダの画像を変更するのと、confフォルダの設定ファイルを書き換えるだけです。
+カスタマイズ性については、かんたんさと詳細さのバランスを取って設計しています。
+もっと詳細なカスタマイズが必要な場合は、作者に要望を出してみてください。
+@set $4 = 1
+@goto LOOP2
+
+:L2_NEXT
+
+###
+### シーン4
+###
+
+@ch c 001-happy.png 1.0
+#@ch c 001-shadow.png 1.0
+*すいか*それでは、何かわからないことがあれば作者までご連絡ください。
+*すいか*Suika 2をご利用いただきどうもありがとうございます。
+@ch c none 1.0
+
+###
+### シーン5
+###
+
+@if $1 != 1 QUIT
+@if $2 != 1 QUIT
+@if $3 != 1 QUIT
+@if $4 != 1 QUIT
+全部読んでいただいてありがとうございました。
+
+###
+### 終了ロゴ
+###
+
+:QUIT
+@bg white.png 1.0
+@ch c luxion.png 0.5
+@wait 1.0
+@ch c none 1.0
+
