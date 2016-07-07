@@ -1,4 +1,4 @@
-Suika 2.0-preview4
+Suika 2.0-preview5
 ==================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
@@ -21,4 +21,10 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
         * ボイス しぐれるぅ。様
 
 * ライセンス
-    * MITライセンスです
+    * MITライセンスです(COPYINGを見てください)
+
+* Change Log
+    *Suika 2.0-preview5
+        * カーテンフェードを実装
+        * Linuxでウィンドウをリサイズできるバグを修正
+
