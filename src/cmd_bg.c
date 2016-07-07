@@ -21,6 +21,9 @@ static stop_watch_t sw;
 /* コマンドの長さ(秒) */
 static float span;
 
+/* カーテンフェードであるか */
+static bool is_curtain;
+
 /* フェードイン中のイメージ */
 static struct image *img;
 
@@ -57,11 +60,22 @@ bool bg_command(int *x, int *y, int *w, int *h)
 /* 初期化処理を行う */
 static bool init(void)
 {
-	const char *fname;
+	const char *fname, *method;
 
 	/* パラメータを取得する */
 	fname = get_string_param(BG_PARAM_FILE);
 	span = get_float_param(BG_PARAM_SPAN);
+	method = get_string_param(BG_PARAM_METHOD);
+
+	/* 描画メソッドを識別する */
+	switch(method[0]) {
+	case 'c':	/* curtain */
+		is_curtain = true;
+		break;
+	default:
+		is_curtain = false;
+		break;
+	}
 
 	/* イメージを読み込む */
 	img = create_image_from_file(BG_DIR, fname);
@@ -130,7 +144,7 @@ static void draw(void)
 
 	/* ステージを描画する */
 	if (repeatedly)
-		draw_stage_bg_fade();
+		draw_stage_bg_fade(is_curtain);
 	else
 		draw_stage();
 }

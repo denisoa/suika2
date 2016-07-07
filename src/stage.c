@@ -15,6 +15,9 @@
 /* false assertion */
 #define BAD_POSITION	(0)
 
+/* カーテンフェードのカーテンの幅 */
+#define CURTAIN_WIDTH	(256)
+
 /* レイヤ */
 enum {
 	/* 背景レイヤ */
@@ -132,6 +135,7 @@ static bool setup_selbox(void);
 static bool setup_save(void);
 static bool create_fade_layer_images(void);
 static void destroy_layer_image(int layer);
+static void draw_stage_bg_fade_curtain(void);
 static int pos_to_layer(int pos);
 static void draw_layer_image(struct image *target, int layer);
 static void draw_layer_image_rect(struct image *target, int layer, int x,
@@ -414,14 +418,57 @@ void draw_stage_rect(int x, int y, int w, int h)
 /*
  * 背景フェードモードが有効な際のステージ描画を行う
  */
-void draw_stage_bg_fade(void)
+void draw_stage_bg_fade(bool is_curtain)
 {
 	assert(!is_save_mode());
 	assert(is_bg_fade_enabled);
 	assert(!is_ch_fade_enabled);
 
-	draw_layer_image(back_image, LAYER_FO);
-	draw_layer_image(back_image, LAYER_BG_FI);
+	if (!is_curtain) {
+		draw_layer_image(back_image, LAYER_FO);
+		draw_layer_image(back_image, LAYER_BG_FI);
+	} else {
+		draw_stage_bg_fade_curtain();
+	}
+}
+
+static void draw_stage_bg_fade_curtain(void)
+{
+	int right, left, curtain, i;
+
+	/* フェードイン画像の右端を求める */
+	right = (int)((float)(conf_window_width + CURTAIN_WIDTH) *
+		      (float)layer_alpha[LAYER_BG_FI] / 255.0f);
+	if (right >= conf_window_width) {
+		curtain = CURTAIN_WIDTH - (right - conf_window_width);
+		right = conf_window_width;
+	} else {
+		curtain = CURTAIN_WIDTH;
+	}
+
+	/* フェードイン画像の右端を求める */
+	left = right - conf_window_width;
+	(void)left;
+
+	/* 背景の非透過部分を描画する */
+	draw_image(back_image, right, 0, layer_image[LAYER_FO],
+		   conf_window_width - right, conf_window_height,
+		   right, 0, 255, BLEND_NONE);
+
+	/* 前景の非透過部分を描画する */
+	if (right - curtain > 0) {
+		draw_image(back_image, 0, 0, layer_image[LAYER_BG_FI],
+			   right - curtain, conf_window_height,
+			   0, 0, 255, BLEND_NONE);
+	}
+
+	/* 前景の透過部分を描画する */
+	for (i = curtain - 1; i >= 0; i--) {
+		if (right - i < 0 || right - i >= conf_window_width)
+			continue;
+		draw_image(back_image, right - i, 0, layer_image[LAYER_BG_FI],
+			   1, conf_window_height, right - i, 0, i, BLEND_FAST);
+	}
 }
 
 /*

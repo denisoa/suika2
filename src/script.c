@@ -44,7 +44,7 @@ struct insn_item {
 	int min;		/* 最小のパラメータ数 */
 	int max;		/* 最大のパラメータ数 */
 } insn_tbl[] = {
-	{"@bg", COMMAND_BG, 1, 2},
+	{"@bg", COMMAND_BG, 1, 3},
 	{"@bgm", COMMAND_BGM, 1, 1},
 	{"@ch", COMMAND_CH, 1, 3},
 	{"@click", COMMAND_CLICK, 0, 1},

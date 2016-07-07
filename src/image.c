@@ -209,9 +209,9 @@ void clear_image_black_rect(struct image *img, int x, int y, int w, int h)
 	assert(img->width > 0 && img->height > 0);
 	assert(img->pixels != NULL);
 	assert(x >= 0 && x < img->width);
-	assert(w >= 0 && x + w < img->width);
+	assert(w >= 0 && x + w <= img->width);
 	assert(y >= 0 && y < img->height);
-	assert(h >= 0 && y + h < img->height);
+	assert(h >= 0 && y + h <= img->height);
 
 	/* ピクセル列の矩形をクリアする */
 	for (i = y; i < y + h; i++)

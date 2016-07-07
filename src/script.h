@@ -57,6 +57,7 @@ enum serif_command_param {
 enum bg_command_param {
 	BG_PARAM_FILE = 1,
 	BG_PARAM_SPAN,
+	BG_PARAM_METHOD,
 };
 
 /* bgmコマンドのパラメータ */

@@ -44,7 +44,7 @@ void draw_stage(void);
 void draw_stage_rect(int x, int y, int w, int h);
 
 /* 背景フェードモードが有効な際のステージ描画を行う */
-void draw_stage_bg_fade(void);
+void draw_stage_bg_fade(bool is_curtain);
 
 /* キャラフェードモードが有効な際のステージ描画を行う */
 void draw_stage_ch_fade(void);
