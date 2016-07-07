@@ -10,7 +10,12 @@ Copyright (C) 2001-2016, TABATA Keiichi. All rights reserved.
     * No 2D/3D acceleration; CPU rendering with SIMD instructions
     * See also http://luxion.jp/s2/
 
+* Binary
+    * http://luxion.jp/s2/dl.html
+
 * License
     * MIT License
-    * See /root/COPYING
+    * See suika2/COPYING
 
+* Build
+    * See build/BUILD
