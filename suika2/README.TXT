@@ -1,4 +1,6 @@
-# Suika 2.0-preview3
+Suika 2.0-preview4
+==================
+
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
 
 * About
@@ -20,4 +22,3 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
 
 * ライセンス
     * MITライセンスです
-
