@@ -121,7 +121,7 @@ avx512.o: ../../src/avx512.c
 #
 
 run: suika.exe
-	cp suika.exe ../../root; cd ../../root; ./suika.exe
+	cp suika.exe ../../suika2; cd ../../suika2; ./suika.exe
 
 clean:
 	rm -f *.o suika.exe *~

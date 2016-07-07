@@ -82,7 +82,7 @@ include ../sse.mk
 #
 
 run: suika
-	cp suika ../../root; cd ../../root; ./suika
+	cp suika ../../suika2; cd ../../suika2; ./suika
 
 clean:
 	rm -rf *~ *.o suika

@@ -97,7 +97,7 @@ include ../sse.mk
 #
 
 run: $(TARGET)
-	cp -R Suika.app ../../root/ && ../../root/Suika.app/Contents/MacOS/Suika
+	cp -R Suika.app ../../suika2/ && ../../suika2/Suika.app/Contents/MacOS/Suika
 
 clean:
 	rm -f $(TARGET) $(OBJS) *~
