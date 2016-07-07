@@ -17,6 +17,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/xpm.h>
+#include <X11/Xatom.h>
 
 #include <unistd.h>	/* usleep() */
 #include <sys/time.h>	/* gettimeofday() */
@@ -262,6 +263,7 @@ static void close_display(void)
 static bool create_window(void)
 {
 	Window root;
+	XSizeHints *sh;
 	unsigned long black, white;
 	int screen, ret;
 
@@ -295,6 +297,15 @@ static bool create_window(void)
 		log_api_error("XMapWindow");
 		return false;
 	}
+
+	/* ウィンドウのサイズを固定する */
+	sh = XAllocSizeHints();
+	sh->flags = PMinSize | PMaxSize;
+	sh->min_width = conf_window_width;
+	sh->min_height = conf_window_height;
+	sh->max_width = conf_window_width;
+	sh->max_height = conf_window_height;
+	XSetWMSizeHints(display, window, sh, XA_WM_NORMAL_HINTS);
 
 	/* イベントマスクを設定する */
 	XSelectInput(display, window, KeyPressMask | ExposureMask |
