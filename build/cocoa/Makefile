@@ -21,8 +21,8 @@ CPPFLAGS = \
 CFLAGS = \
 	-arch i386 \
 	-arch x86_64 \
-	-O0 \
-	-g3 \
+	-mmacosx-version-min=10.6 \
+	-O3 \
 	-ftree-vectorize \
 	-std=gnu89 \
 	-Wall \
@@ -37,7 +37,7 @@ CFLAGS = \
 
 LDFLAGS = \
 	-arch i386 \
-	-arch x86_64 \
+	-mmacosx-version-min=10.6 \
 	-framework Cocoa \
 	-framework AudioUnit \
 	-lpthread \
