@@ -207,11 +207,8 @@ static bool setup_namebox(void)
 {
 	/* 名前ボックスの画像を読み込む */
 	namebox_image = create_image_from_file(CG_DIR, conf_namebox_file);
-	if (namebox_image == NULL) {
-		log_file_open(conf_namebox_file);
-		log_script_exec_footer();
+	if (namebox_image == NULL)
 		return false;
-	}
 
 	/* 名前ボックスのレイヤのイメージを作成する */
 	layer_image[LAYER_NAME] = create_image(get_image_width(namebox_image),
@@ -234,11 +231,8 @@ static bool setup_msgbox(void)
 {
 	/* メッセージボックスの画像を読み込む */
 	msgbox_image = create_image_from_file(CG_DIR, conf_msgbox_file);
-	if (msgbox_image == NULL) {
-		log_file_open(conf_msgbox_file);
-		log_script_exec_footer();
+	if (msgbox_image == NULL)
 		return false;
-	}
 
 	/* メッセージボックスのレイヤのイメージを作成する */
 	layer_image[LAYER_MSG] = create_image(get_image_width(msgbox_image),
@@ -262,11 +256,8 @@ static bool setup_click(void)
 	/* クリックアニメーションの画像を読み込む */
 	layer_image[LAYER_CLICK] = create_image_from_file(CG_DIR,
 							  conf_click_file);
-	if (layer_image[LAYER_CLICK] == NULL) {
-		log_file_open(conf_click_file);
-		log_script_exec_footer();
+	if (layer_image[LAYER_CLICK] == NULL)
 		return false;
-	}
 
 	/* クリックアニメーションレイヤの配置を行う */
 	layer_x[LAYER_CLICK] = conf_click_x;
@@ -280,11 +271,8 @@ static bool setup_selbox(void)
 {
 	/* 選択肢ボックスの画像を読み込む */
 	selbox_bg_image = create_image_from_file(CG_DIR, conf_selbox_bg_file);
-	if (selbox_bg_image == NULL) {
-		log_file_open(conf_selbox_bg_file);
-		log_script_exec_footer();
+	if (selbox_bg_image == NULL)
 		return false;
-	}
 	selbox_fg_image = create_image_from_file(CG_DIR, conf_selbox_fg_file);
 	if (selbox_fg_image == NULL) {
 		log_file_open(conf_selbox_fg_file);
@@ -311,11 +299,8 @@ static bool setup_save(void)
 {
 	/* セーブ画面(非選択)の画像を読み込む */
 	save_bg_image = create_image_from_file(CG_DIR, conf_save_bg_file);
-	if (save_bg_image == NULL) {
-		log_file_open(conf_save_bg_file);
-		log_script_exec_footer();
+	if (save_bg_image == NULL)
 		return false;
-	}
 
 	/* セーブ画面(非選択)の画像を読み込む */
 	save_fg_image = create_image_from_file(CG_DIR, conf_save_fg_file);
