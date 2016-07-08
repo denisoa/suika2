@@ -37,17 +37,18 @@ CFLAGS = \
 
 LDFLAGS = \
 	-arch i386 \
+	-arch x86_64 \
 	-mmacosx-version-min=10.6 \
-	-framework Cocoa \
-	-framework AudioUnit \
-	-lpthread \
 	-L./libroot/lib \
 	-lz \
 	-lpng16 \
 	-logg \
 	-lvorbis \
 	-lvorbisfile \
-	-lfreetype
+	-lfreetype \
+	-lpthread \
+	-framework Cocoa \
+	-framework AudioUnit
 
 #
 # Source files
