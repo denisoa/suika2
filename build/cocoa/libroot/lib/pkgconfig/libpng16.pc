@@ -1,4 +1,4 @@
-prefix=/Users/tabata/Dropbox/suika/build/cocoa/libroot
+prefix=/Users/tabata/Dropbox/suika2/build/cocoa/libroot
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include/libpng16

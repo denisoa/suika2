@@ -17,7 +17,7 @@ old_library='libvorbisfile.a'
 inherited_linker_flags=' '
 
 # Libraries that this one depends upon.
-dependency_libs=' /Users/tabata/Dropbox/suika/build/cocoa/libroot/lib/libvorbis.la -L/Users/tabata/Dropbox/suika/build/cocoa/libroot/lib -lm /Users/tabata/Dropbox/suika/build/cocoa/libroot/lib/libogg.la'
+dependency_libs=' /Users/tabata/Dropbox/suika2/build/cocoa/libroot/lib/libvorbis.la -L/Users/tabata/Dropbox/suika2/build/cocoa/libroot/lib -lm /Users/tabata/Dropbox/suika2/build/cocoa/libroot/lib/libogg.la'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/Users/tabata/Dropbox/suika/build/cocoa/libroot/lib'
+libdir='/Users/tabata/Dropbox/suika2/build/cocoa/libroot/lib'
