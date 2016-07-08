@@ -1,30 +1,30 @@
-Suika 2.0-preview5
+Suika 2.0-preview6
 ==================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
 
 * About
-    * è‡ªç”±ã«ä½¿ãˆã‚‹ã‚¢ãƒ‰ãƒ™ãƒ³ãƒãƒ£ãƒ¼ã‚²ãƒ¼ãƒ åˆ¶ä½œãƒ„ãƒ¼ãƒ«ã§ã™
-    * Windows/Mac/Linuxã§å‹•ãã¾ã™
-    * 2D/3Dã‚¢ã‚¯ã‚»ãƒ©ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ã‚’ä½¿ã‚ãªã„ãŸã‚ã€ç’°å¢ƒã‚’é¸ã°ãšå‹•ãã¾ã™
+    * Ž©—R‚ÉŽg‚¦‚éƒAƒhƒxƒ“ƒ`ƒƒ[ƒQ[ƒ€§ìƒc[ƒ‹‚Å‚·
+    * Windows/Mac/Linux‚Å“®‚«‚Ü‚·
+    * 2D/3DƒAƒNƒZƒ‰ƒŒ[ƒVƒ‡ƒ“‚ðŽg‚í‚È‚¢‚½‚ßAŠÂ‹«‚ð‘I‚Î‚¸“®‚«‚Ü‚·
 
 * Contact
-    * å…¬å¼WEB http://luxion.jp/s2/
-    * é€£çµ¡å…ˆ tabata at luxion dot jp
-    * ã¾ã å…¬é–‹ã—ãŸã°ã‹ã‚Šãªã®ã§ã€ãªã‚“ã§ã‚‚é€£çµ¡ã—ã¦ãã ã•ã‚‹ã¨ã†ã‚Œã—ã„ã§ã™
+    * ŒöŽ®WEB http://luxion.jp/s2/
+    * ˜A—æ tabata at luxion dot jp
+    * ‚Ü‚¾ŒöŠJ‚µ‚½‚Î‚©‚è‚È‚Ì‚ÅA‚È‚ñ‚Å‚à˜A—‚µ‚Ä‚­‚¾‚³‚é‚Æ‚¤‚ê‚µ‚¢‚Å‚·
 
 * Credit
-    * Luxion
-        * éŸ³æ¥½ 80 Copyright (C) 2016 80. All rights reserved.
-    * Guests
-        * éŸ³æ¥½ krolæ§˜
-        * ãƒœã‚¤ã‚¹ ã—ãã‚Œã‚‹ã…ã€‚æ§˜
+    * ‰¹Šy 80 Copyright (C) 2016 80. All rights reserved.
+    * ‰¹Šy krol—l
+    * ƒ{ƒCƒX ‚µ‚®‚ê‚é‚£B—l
 
-* ãƒ©ã‚¤ã‚»ãƒ³ã‚¹
-    * MITãƒ©ã‚¤ã‚»ãƒ³ã‚¹ã§ã™(COPYINGã‚’è¦‹ã¦ãã ã•ã„)
+* ƒ‰ƒCƒZƒ“ƒX
+    * MITƒ‰ƒCƒZƒ“ƒX‚Å‚·(COPYING‚ð‚²——‚­‚¾‚³‚¢)
 
-* Change Log
-    *Suika 2.0-preview5
-        * ã‚«ãƒ¼ãƒ†ãƒ³ãƒ•ã‚§ãƒ¼ãƒ‰ã‚’å®Ÿè£…
-        * Linuxã§ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚’ãƒªã‚µã‚¤ã‚ºã§ãã‚‹ãƒã‚°ã‚’ä¿®æ­£
-
+* •ÏX—š—ð
+    * Suika 2.0-preview6
+        * Mac OS X 10.6ˆÈ~‚Å“®ì‰Â”\‚É‚µ‚½
+	* cg/ˆÈ‰º‚Ìƒtƒ@ƒCƒ‹‚ª‚Ý‚Â‚©‚ç‚È‚¢Û‚ÌƒGƒ‰[•\Ž¦‚ª‚¨‚©‚µ‚¢ƒoƒO‚ðC³
+    * Suika 2.0-preview5
+        * ƒJ[ƒeƒ“ƒtƒF[ƒh‚ðŽÀ‘•
+        * Linux‚ÅƒEƒBƒ“ƒhƒE‚ðƒŠƒTƒCƒY‚Å‚«‚éƒoƒO‚ðC³
