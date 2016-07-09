@@ -128,6 +128,12 @@ BOOL isControlPressed;
     if (!isInitialized)
         return;
     
+#if !__has_feature(objc_arc)
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+#else
+    @autoreleasepool {
+#endif
+
     // フレーム描画イベントを実行する
     int x = 0, y = 0, w = 0, h = 0;
     if (!on_event_frame(&x, &y, &w, &h)) {
@@ -139,6 +145,12 @@ BOOL isControlPressed;
     if (w != 0 && h != 0)
         [self setNeedsDisplay:YES];
     
+#if !__has_feature(objc_arc)
+    [pool release];
+#else
+    }
+#endif
+
     // FIXME:
     // [self setNeedsDisplayInRect:NSMakeRect(x, y, w, h)];
 }
@@ -192,6 +204,8 @@ BOOL isControlPressed;
                 fraction:1.0];
 
 #if !__has_feature(objc_arc)
+        [img autorelease];
+        [rep autorelease];
         [pool release];
 #else
     }
@@ -323,6 +337,12 @@ int main()
     x86_check_cpuid_flags();
 #endif
 
+#if !__has_feature(objc_arc)
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+#else
+    @autoreleasepool {
+#endif
+
     // ログをオープンする
     if (!openLog())
         return 1;
@@ -331,77 +351,80 @@ int main()
     if (!init_conf())
         return 1;
 
-#if !__has_feature(objc_arc)
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-#else
-    @autoreleasepool {
-#endif
-        // アプリケーションの初期化処理を行う
-        [NSApplication sharedApplication];
-        [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+    // アプリケーションの初期化処理を行う
+    [NSApplication sharedApplication];
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
-        // メニューバーを作成する
-        id menuBar = [NSMenu new];
-        id appMenuItem = [NSMenuItem new];
-        [menuBar addItem:appMenuItem];
-        [NSApp setMainMenu:menuBar];
+    // メニューバーを作成する
+    id menuBar = [NSMenu new];
+    id appMenuItem = [NSMenuItem new];
+    [menuBar addItem:appMenuItem];
+    [NSApp setMainMenu:menuBar];
 
-        // アプリケーションのメニューを作成する
-        id appMenu = [NSMenu new];
-        id quitMenuItem = [[NSMenuItem alloc]
-                              initWithTitle:[NSString stringWithFormat:@"%@ %s",
-                                                @"Quit", conf_window_title]
-                                     action:@selector(terminate:)
-                              keyEquivalent:@"q"];
-        [appMenu addItem:quitMenuItem];
-        [appMenuItem setSubmenu:appMenu];
+    // アプリケーションのメニューを作成する
+    id appMenu = [NSMenu new];
+    id quitMenuItem = [[NSMenuItem alloc]
+                          initWithTitle:[NSString stringWithFormat:@"%@ %s",
+                                                  @"Quit", conf_window_title]
+                                 action:@selector(terminate:)
+                          keyEquivalent:@"q"];
+    [appMenu addItem:quitMenuItem];
+    [appMenuItem setSubmenu:appMenu];
 
-        // ウィンドウを作成する
-        theWindow = [[NSWindow alloc]
-						initWithContentRect:NSMakeRect(0, 0,
-                                                       conf_window_width,
-                                                       conf_window_height)
-                                  styleMask:NSTitledWindowMask |
-                                            NSClosableWindowMask |
-                                            NSMiniaturizableWindowMask
-                                    backing:NSBackingStoreBuffered
-                                      defer:NO];
-        [theWindow cascadeTopLeftFromPoint:NSMakePoint(20,20)];
-        [theWindow setTitle:[[NSString alloc] initWithUTF8String:conf_window_title]];
-        [theWindow makeKeyAndOrderFront:nil];
-        [theWindow setAcceptsMouseMovedEvents:YES];
+    // ウィンドウを作成する
+    theWindow = [[NSWindow alloc]
+                     initWithContentRect:NSMakeRect(0, 0,
+                                                    conf_window_width,
+                                                    conf_window_height)
+                               styleMask:NSTitledWindowMask |
+                                         NSClosableWindowMask |
+                                         NSMiniaturizableWindowMask
+                                 backing:NSBackingStoreBuffered
+                                   defer:NO];
+    [theWindow cascadeTopLeftFromPoint:NSMakePoint(20,20)];
+    [theWindow setTitle:[[NSString alloc]
+     initWithUTF8String:conf_window_title]];
+    [theWindow makeKeyAndOrderFront:nil];
+    [theWindow setAcceptsMouseMovedEvents:YES];
 
-        // ビューを作成する
-        theView = [[SuikaView alloc] init];
-        [theWindow setContentView:theView];
-        [theWindow makeFirstResponder:theView];
+    // ビューを作成する
+    theView = [[SuikaView alloc] init];
+    [theWindow setContentView:theView];
+    [theWindow makeFirstResponder:theView];
 
-        // デリゲートを設定する
-        [NSApp setDelegate:theView];
-        [theWindow setDelegate:theView];
+    // デリゲートを設定する
+    [NSApp setDelegate:theView];
+    [theWindow setDelegate:theView];
 
-        // タイマをセットする
-        [NSTimer scheduledTimerWithTimeInterval:1.0/30.0
-                                         target:theView
-                                       selector:@selector(timerFired:)
-                                       userInfo:nil
-                                        repeats:YES];
+    // タイマをセットする
+    id timer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0
+                                                target:theView
+                                              selector:@selector(timerFired:)
+                                              userInfo:nil
+                                               repeats:YES];
 
-        // Hack: コマンドラインから起動された際にメニューを有効にする
-        ProcessSerialNumber psn = {0, kCurrentProcess};
-        TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+    // Hack: コマンドラインから起動された際にメニューを有効にする
+    ProcessSerialNumber psn = {0, kCurrentProcess};
+    TransformProcessType(&psn, kProcessTransformToForegroundApplication);
 
-        // メインループを実行する
-        [NSApp activateIgnoringOtherApps:YES];
-        [NSApp run];
+    // メインループを実行する
+    [NSApp activateIgnoringOtherApps:YES];
+    [NSApp run];
 
-        // コンフィグの終了処理を行う
-        cleanup_conf();
+    // コンフィグの終了処理を行う
+    cleanup_conf();
         
-        // ログをクローズする
-        closeLog();
+    // ログをクローズする
+    closeLog();
 
 #if !__has_feature(objc_arc)
+    [menuBar autorelease];
+    [appMenuItem autorelease];
+    [appMenu autorelease];
+    [appMenuItem autorelease];
+    [theWindow autorelease];
+    [theView autorelease];
+    [timer autorelease];
     [pool release];
 #else
     }
@@ -428,6 +451,9 @@ static BOOL openLog(void)
         [alert setMessageText:@"エラー"];
         [alert setInformativeText:@"Cannot open log file."];
         [alert runModal];
+#if !__has_feature(objc_arc)
+        [alert autorelease];
+#endif
         return NO;
     }
     return YES;
@@ -450,11 +476,26 @@ static void closeLog(void)
 //
 char *make_valid_path(const char *dir, const char *fname)
 {
+    char *ret;
+
+#if !__has_feature(objc_arc)
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+#else
+    @autoreleasepool {
+#endif
+
     NSString *base = [[[NSBundle mainBundle] bundlePath]
                          stringByDeletingLastPathComponent];
     NSString *path = [NSString stringWithFormat:@"%@/%s/%s", base, dir, fname];
     const char *cstr = [path UTF8String];
-    char *ret = strdup(cstr);
+    ret = strdup(cstr);
+
+#if !__has_feature(objc_arc)
+    [pool release];
+#else
+    }
+#endif
+
     if(ret == NULL) {
         log_memory();
         return NULL;

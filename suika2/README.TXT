@@ -1,5 +1,5 @@
-Suika 2.0-preview6
-==================
+Suika 2.0.0-preview7
+====================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
 
@@ -22,9 +22,11 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * MITライセンスです(COPYINGをご覧ください)
 
 * 変更履歴
-    * Suika 2.0-preview6
+    * Suika 2.0.0-preview7
+        * Macアプリでメモリを使いすぎてフリーズする問題を修正
+    * Suika 2.0.0-preview6
         * Mac OS X 10.6以降で動作可能にした
 	* cg/以下のファイルがみつからない際のエラー表示がおかしいバグを修正
-    * Suika 2.0-preview5
+    * Suika 2.0.0-preview5
         * カーテンフェードを実装
         * Linuxでウィンドウをリサイズできるバグを修正
