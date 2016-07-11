@@ -1,4 +1,4 @@
-Suika 2.0.0-preview7
+Suika 2.0.0-preview8
 ====================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
@@ -18,15 +18,26 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * 音楽 krol様
     * ボイス しぐれるぅ。様
 
-* ライセンス
+* License
     * MITライセンスです(COPYINGをご覧ください)
 
-* 変更履歴
-    * Suika 2.0.0-preview7
+* ChangeLog
+    * Suika 2.0.0-preview8 2016/07/11
+        * メッセージログを実装
+    * Suika 2.0.0-preview7 2016/07/09
         * Macアプリでメモリを使いすぎてフリーズする問題を修正
-    * Suika 2.0.0-preview6
+    * Suika 2.0.0-preview6 2016/07/08
         * Mac OS X 10.6以降で動作可能にした
 	* cg/以下のファイルがみつからない際のエラー表示がおかしいバグを修正
-    * Suika 2.0.0-preview5
+    * Suika 2.0.0-preview5 2016/07/08
         * カーテンフェードを実装
         * Linuxでウィンドウをリサイズできるバグを修正
+    * Suika 2.0-preview4 2016/07/07
+        * github公開
+    * Suika 2.0-preview3 2016/07/05
+        * WindowsでBGMがリピート再生されないバグを修正
+    * Suika 2.0-preview2 2016/07/04
+        * menuコマンドを実装
+    * Suika 2.0-preview1 2016/07/04
+        * 初公開
+

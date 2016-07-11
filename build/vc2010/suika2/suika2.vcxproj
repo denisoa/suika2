@@ -91,6 +91,7 @@
     <ClInclude Include="..\..\..\src\event.h" />
     <ClInclude Include="..\..\..\src\file.h" />
     <ClInclude Include="..\..\..\src\glyph.h" />
+    <ClInclude Include="..\..\..\src\history.h" />
     <ClInclude Include="..\..\..\src\image.h" />
     <ClInclude Include="..\..\..\src\log.h" />
     <ClInclude Include="..\..\..\src\main.h" />
@@ -126,6 +127,7 @@
     <ClCompile Include="..\..\..\src\event.c" />
     <ClCompile Include="..\..\..\src\file.c" />
     <ClCompile Include="..\..\..\src\glyph.c" />
+    <ClCompile Include="..\..\..\src\history.c" />
     <ClCompile Include="..\..\..\src\image.c" />
     <ClCompile Include="..\..\..\src\log.c" />
     <ClCompile Include="..\..\..\src\main.c" />

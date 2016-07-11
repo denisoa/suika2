@@ -29,6 +29,7 @@
 		26A1E07E1D112655004C7108 /* image.c in Sources */ = {isa = PBXBuildFile; fileRef = 26A1E07C1D112655004C7108 /* image.c */; };
 		26A1E07F1D112655004C7108 /* nsmain.m in Sources */ = {isa = PBXBuildFile; fileRef = 26A1E07D1D112655004C7108 /* nsmain.m */; };
 		26E7A7E91D2FD68E003E211A /* cmd_menu.c in Sources */ = {isa = PBXBuildFile; fileRef = 26E7A7E81D2FD68E003E211A /* cmd_menu.c */; };
+		26F8FD3A1D335E790078D4FB /* history.c in Sources */ = {isa = PBXBuildFile; fileRef = 26F8FD391D335E790078D4FB /* history.c */; };
 		26F9F1361D181BF60073AC13 /* libfreetype.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F9F1311D181BF60073AC13 /* libfreetype.a */; };
 		26F9F1371D181BF60073AC13 /* libogg.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F9F1321D181BF60073AC13 /* libogg.a */; };
 		26F9F1381D181BF60073AC13 /* libvorbis.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 26F9F1331D181BF60073AC13 /* libvorbis.a */; };
@@ -99,6 +100,8 @@
 		26A1E07D1D112655004C7108 /* nsmain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = nsmain.m; path = ../../../src/nsmain.m; sourceTree = "<group>"; };
 		26A1E0801D1129FB004C7108 /* drawimage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = drawimage.h; path = ../../../src/drawimage.h; sourceTree = "<group>"; };
 		26E7A7E81D2FD68E003E211A /* cmd_menu.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cmd_menu.c; path = ../../../src/cmd_menu.c; sourceTree = "<group>"; };
+		26F8FD391D335E790078D4FB /* history.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = history.c; path = ../../../src/history.c; sourceTree = "<group>"; };
+		26F8FD3B1D335E980078D4FB /* history.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = history.h; path = ../../../src/history.h; sourceTree = "<group>"; };
 		26F9F1311D181BF60073AC13 /* libfreetype.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libfreetype.a; path = ../cocoa/libroot/lib/libfreetype.a; sourceTree = "<group>"; };
 		26F9F1321D181BF60073AC13 /* libogg.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libogg.a; path = ../cocoa/libroot/lib/libogg.a; sourceTree = "<group>"; };
 		26F9F1331D181BF60073AC13 /* libvorbis.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libvorbis.a; path = ../cocoa/libroot/lib/libvorbis.a; sourceTree = "<group>"; };
@@ -221,6 +224,7 @@
 				26F9F1441D1A1DE40073AC13 /* event.c */,
 				26F9F1601D24D29B0073AC13 /* file.c */,
 				2681DDE31D15DCBC00E92FEA /* glyph.c */,
+				26F8FD391D335E790078D4FB /* history.c */,
 				26A1E07C1D112655004C7108 /* image.c */,
 				2681DD9F1D116B8900E92FEA /* log.c */,
 				26F9F1451D1A1DE40073AC13 /* main.c */,
@@ -247,6 +251,7 @@
 				26F9F1401D1A1DE40073AC13 /* event.h */,
 				26F9F15F1D24D27A0073AC13 /* file.h */,
 				2681DDE81D15DD2800E92FEA /* glyph.h */,
+				26F8FD3B1D335E980078D4FB /* history.h */,
 				26A1E07A1D112655004C7108 /* image.h */,
 				2681DD921D116B8900E92FEA /* log.h */,
 				26F9F1411D1A1DE40073AC13 /* main.h */,
@@ -360,6 +365,7 @@
 				2681DDD91D135EA000E92FEA /* sse3.c in Sources */,
 				2681DDDA1D135EA000E92FEA /* sse41.c in Sources */,
 				26F9F14D1D1D71160073AC13 /* cmd_message.c in Sources */,
+				26F8FD3A1D335E790078D4FB /* history.c in Sources */,
 				26F9F15E1D24D2350073AC13 /* cmd_set.c in Sources */,
 				2681DDDB1D135EA000E92FEA /* sse42.c in Sources */,
 				2681DDD31D135EA000E92FEA /* avx.c in Sources */,

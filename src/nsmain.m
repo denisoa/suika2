@@ -268,11 +268,11 @@ BOOL isControlPressed;
 
 - (void)scrollWheel:(NSEvent *)theEvent {
     if([theEvent deltaY] > 0) {
-        on_event_key_press(KEY_DOWN);
-        on_event_key_release(KEY_DOWN);
-    } else if([theEvent deltaY] < 0) {
         on_event_key_press(KEY_UP);
         on_event_key_release(KEY_UP);
+    } else if([theEvent deltaY] < 0) {
+        on_event_key_press(KEY_DOWN);
+        on_event_key_release(KEY_DOWN);
     }
 }
 
@@ -437,6 +437,8 @@ int main()
     [timer autorelease];
     [pool release];
 #else
+    (void)timer;
+
     }
 #endif
 
