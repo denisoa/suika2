@@ -411,7 +411,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd,
 		on_event_mouse_move(LOWORD(lParam), HIWORD(lParam));
 		return 0;
 	case WM_MOUSEWHEEL:
-		on_event_mouse_scroll((int)(short)HIWORD(wParam));
+		if((int)(short)HIWORD(wParam) > 0) {
+			on_event_key_press(KEY_DOWN);
+			on_event_key_release(KEY_DOWN);
+		} else if((int)(short)HIWORD(wParam) < 0) {
+			on_event_key_press(KEY_UP);
+			on_event_key_release(KEY_UP);
+		}
 		return 0;
 	case WM_PAINT:
 		OnPaint();

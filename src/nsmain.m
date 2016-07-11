@@ -266,6 +266,16 @@ BOOL isControlPressed;
 	on_event_mouse_move((int)pos.x, conf_window_height - (int)pos.y);
 }
 
+- (void)scrollWheel:(NSEvent *)theEvent {
+    if([theEvent deltaY] > 0) {
+        on_event_key_press(KEY_DOWN);
+        on_event_key_release(KEY_DOWN);
+    } else if([theEvent deltaY] < 0) {
+        on_event_key_press(KEY_UP);
+        on_event_key_release(KEY_UP);
+    }
+}
+
 - (void)flagsChanged:(NSEvent *)theEvent {
     // Controlキーの状態を取得する
     BOOL bit = ([theEvent modifierFlags] & NSControlKeyMask) ==
