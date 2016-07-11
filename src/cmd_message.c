@@ -267,7 +267,7 @@ static bool process_serif_command(void)
 	}
 
 	/* ボイスを再生する */
-	if (!is_control_pressed)
+	if (!is_control_pressed && !history_flag)
 		if (!play_voice())
 			return false;
 
