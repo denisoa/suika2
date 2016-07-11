@@ -157,7 +157,8 @@ static bool init(void)
 		return false;
 
 	/* セリフの場合を処理する */
-	process_serif_command();
+	if (!process_serif_command())
+		return false;
 
 	/* メッセージを取得する */
 	msg = get_command_type() == COMMAND_MESSAGE ?
@@ -330,8 +331,10 @@ static bool play_voice(void)
 
 	/* PCMストリームを開く */
 	w = create_wave_from_file(CV_DIR, voice, false);
-	if (w == NULL)
+	if (w == NULL) {
+		log_script_exec_footer();
 		return false;
+	}
 
 	/* PCMストリームを再生する */
 	set_mixer_input(VOICE_STREAM, w);
