@@ -169,3 +169,28 @@ save.data5.y=448
 save.data6.x=448
 save.data6.y=512
 
+###
+### ヒストリ画面の設定
+###
+
+# 背景色
+history.color.r=60
+history.color.g=60
+history.color.b=255
+history.color.a=128
+
+# 行間マージン
+history.margin.line=48
+
+# 画面左のマージン
+history.margin.left=20
+
+# 画面上のマージン
+history.margin.top=20
+
+# 画面右のマージン
+history.margin.right=20
+
+# 画面下のマージン
+history.margin.bottom=20
+

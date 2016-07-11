@@ -106,6 +106,19 @@ int conf_save_data6_x;
 int conf_save_data6_y;
 
 /*
+ * ヒストリ画面の設定
+ */
+int conf_history_color_r;
+int conf_history_color_g;
+int conf_history_color_b;
+int conf_history_color_a;
+int conf_history_margin_line;
+int conf_history_margin_left;
+int conf_history_margin_top;
+int conf_history_margin_right;
+int conf_history_margin_bottom;
+
+/*
  * 1行のサイズ
  */
 #define BUF_SIZE	(1024)
@@ -185,6 +198,15 @@ struct rule {
 	{"save.data5.y", 'i', &conf_save_data5_y, false, false},
 	{"save.data6.x", 'i', &conf_save_data6_x, false, false},
 	{"save.data6.y", 'i', &conf_save_data6_y, false, false},
+	{"history.color.r", 'i', &conf_history_color_r, false, false},
+	{"history.color.g", 'i', &conf_history_color_g, false, false},
+	{"history.color.b", 'i', &conf_history_color_b, false, false},
+	{"history.color.a", 'i', &conf_history_color_a, false, false},
+	{"history.margin.line", 'i', &conf_history_margin_line, false, false},
+	{"history.margin.left", 'i', &conf_history_margin_left, false, false},
+	{"history.margin.top", 'i', &conf_history_margin_top, false, false},
+	{"history.margin.right", 'i', &conf_history_margin_right, false, false},
+	{"history.margin.bottom", 'i', &conf_history_margin_bottom, false, false},
 };
 
 #define RULE_TBL_SIZE	(sizeof(rule_tbl) / sizeof(struct rule))

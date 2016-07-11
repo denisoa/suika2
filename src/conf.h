@@ -108,6 +108,19 @@ extern int conf_save_data5_y;
 extern int conf_save_data6_x;
 extern int conf_save_data6_y;
 
+/*
+ * ヒストリ画面の設定
+ */
+extern int conf_history_color_r;
+extern int conf_history_color_g;
+extern int conf_history_color_b;
+extern int conf_history_color_a;
+extern int conf_history_margin_line;
+extern int conf_history_margin_left;
+extern int conf_history_margin_top;
+extern int conf_history_margin_right;
+extern int conf_history_margin_bottom;
+
 /* コンフィグの初期化処理を行う */
 bool init_conf(void);
 
