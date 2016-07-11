@@ -45,13 +45,16 @@ static bool dispatch_command(int *x, int *y, int *w, int *h);
  */
 bool game_loop_iter(int *x, int *y, int *w, int *h)
 {
-	if (!is_save_mode()) {
+	if (is_save_mode()) {
+		/* セーブ画面を実行する */
+		run_save_mode(x, y, w, h);
+	} else if (is_history_mode()) {
+		/* ヒストリ画面を実行する */
+		run_history_mode(x, y, w, h);
+	} else {
 		/* コマンドを実行する */
 		if (!dispatch_command(x, y, w, h))
 			return false;
-	} else {
-		/* セーブ画面を実行する */
-		run_save_mode(x, y, w, h);
 	}
 
 	/* サウンドのフェード処理を実行する */
@@ -65,6 +68,8 @@ bool game_loop_iter(int *x, int *y, int *w, int *h)
 	is_right_button_pressed = false;
 	is_return_pressed = false;
 	is_escape_pressed = false;
+	is_up_pressed = false;
+	is_down_pressed = false;
 
 	return true;
 }

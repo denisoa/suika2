@@ -184,24 +184,49 @@ int get_image_height(struct image *img)
  */
 void clear_image_black(struct image *img)
 {
-	pixel_t *p;
-	int x, y;
-
-	assert(img != NULL);
-	assert(img->width > 0 && img->height > 0);
-	assert(img->pixels != NULL);
-
-	/* ピクセル列全体をクリアする */
-	p = img->pixels;
-	for (y = 0; y < img->height; y++)
-		for (x = 0; x < img->width; x++)
-			*p++ = make_pixel(0xff, 0, 0, 0);
+	clear_image_color_rect(img, 0, 0, img->width, img->height,
+			       make_pixel(0xff, 0, 0, 0));
 }
 
 /*
  * イメージの矩形を黒色でクリアする
  */
 void clear_image_black_rect(struct image *img, int x, int y, int w, int h)
+{
+	clear_image_color_rect(img, x, y, w, h, make_pixel(0xff, 0, 0, 0));
+}
+
+/*
+ * イメージを白色でクリアする
+ */
+void clear_image_white(struct image *img)
+{
+	clear_image_color_rect(img, 0, 0, img->width, img->height,
+			       make_pixel(0xff, 0xff, 0xff, 0xff));
+}
+
+/*
+ * イメージの矩形を白色でクリアする
+ */
+void clear_image_white_rect(struct image *img, int x, int y, int w, int h)
+{
+	clear_image_color_rect(img, x, y, w, h,
+			       make_pixel(0xff, 0xff, 0xff, 0xff));
+}
+
+/*
+ * イメージを色でクリアする
+ */
+void clear_image_color(struct image *img, pixel_t color)
+{
+	clear_image_color_rect(img, 0, 0, img->width, img->height, color);
+}
+
+/*
+ * イメージの矩形を色でクリアする
+ */
+void clear_image_color_rect(struct image *img, int x, int y, int w, int h,
+			    pixel_t color)
 {
 	int i, j;
 
@@ -216,49 +241,7 @@ void clear_image_black_rect(struct image *img, int x, int y, int w, int h)
 	/* ピクセル列の矩形をクリアする */
 	for (i = y; i < y + h; i++)
 		for (j = x; j < x + w; j++)
-			img->pixels[img->width * i + j] =
-				make_pixel(0xff, 0, 0, 0);
-}
-
-/*
- * イメージを白色でクリアする
- */
-void clear_image_white(struct image *img)
-{
-	pixel_t *p;
-	int x, y;
-
-	assert(img != NULL);
-	assert(img->width > 0 && img->height > 0);
-	assert(img->pixels != NULL);
-
-	/* ピクセル列全体をクリアする */
-	p = img->pixels;
-	for (y = 0; y < img->height; y++)
-		for (x = 0; x < img->width; x++)
-			*p++ = make_pixel(0xff, 0xff, 0xff, 0xff);
-}
-
-/*
- * イメージの矩形を白色でクリアする
- */
-void clear_image_white_rect(struct image *img, int x, int y, int w, int h)
-{
-	int i, j;
-
-	assert(img != NULL);
-	assert(img->width > 0 && img->height > 0);
-	assert(img->pixels != NULL);
-	assert(x >= 0 && x < img->width);
-	assert(w >= 0 && x + w <= img->width);
-	assert(y >= 0 && y < img->height);
-	assert(h >= 0 && y + h <= img->height);
-
-	/* ピクセル列の矩形をクリアする */
-	for (i = y; i < img->height; i++)
-		for (j = x; j < img->width; j++)
-			img->pixels[img->width * i + j] =
-				make_pixel(0xff, 0xff, 0xff, 0xff);
+			img->pixels[img->width * i + j] = color;
 }
 
 /*

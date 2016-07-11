@@ -26,6 +26,7 @@
 #include "event.h"
 #include "file.h"
 #include "glyph.h"
+#include "history.h"
 #include "image.h"
 #include "log.h"
 #include "main.h"

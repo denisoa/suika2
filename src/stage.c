@@ -417,6 +417,7 @@ void draw_stage_bg_fade(bool is_curtain)
 	}
 }
 
+/* カーテンフェードの描画を行う */
 static void draw_stage_bg_fade_curtain(void)
 {
 	int right, left, curtain, i;
@@ -493,7 +494,9 @@ void draw_stage_with_buttons(int x1, int y1, int w1, int h1, int x2, int y2,
 		   255, BLEND_NONE);
 }
 
-/* ステージの背景(FO)のうち1矩形と、前景(FI)のうち1矩形を描画する */
+/*
+ * ステージの背景(FO)のうち1矩形と、前景(FI)のうち1矩形を描画する
+ */
 void draw_stage_rect_with_buttons(int old_x, int old_y, int old_w, int old_h,
 				  int new_x, int new_y, int new_w, int new_h)
 {
@@ -508,6 +511,25 @@ void draw_stage_rect_with_buttons(int old_x, int old_y, int old_w, int old_h,
 	/* 新しいボタンを描画する */
 	draw_image(back_image, new_x, new_y, layer_image[LAYER_FI], new_w,
 		   new_h, new_x, new_y, 255, BLEND_NONE);
+}
+
+/*
+ * ステージの背景(FO)と前景(FI)を描画する
+ */
+void draw_stage_history(void)
+{
+	assert(is_history_mode());
+	assert(!is_save_mode());
+	assert(!is_bg_fade_enabled);
+	assert(!is_ch_fade_enabled);
+
+	/* 古いボタンを消す */
+	draw_image(back_image, 0, 0, layer_image[LAYER_FO], conf_window_width,
+		   conf_window_height, 0, 0, 255, BLEND_NONE);
+
+	/* 新しいボタンを描画する */
+	draw_image(back_image, 0, 0, layer_image[LAYER_FI], conf_window_width,
+		   conf_window_height, 0, 0, 255, BLEND_FAST);
 }
 
 /*
@@ -966,6 +988,43 @@ void draw_image_to_fi(struct image *img)
 {
 	draw_image(layer_image[LAYER_FI], 0, 0, img, get_image_width(img),
 		   get_image_height(img), 0, 0, 255, BLEND_NONE);
+}
+
+/*
+ * ヒストリの表示
+ */
+
+/*
+ * FOレイヤにステージを描画する
+ */
+void draw_history_fo(void)
+{
+	draw_layer_image_rect(layer_image[LAYER_FO], LAYER_BG, 0, 0,
+			      conf_window_width, conf_window_height);
+	draw_layer_image_rect(layer_image[LAYER_FO], LAYER_CHB, 0, 0,
+      			      conf_window_width, conf_window_height);
+	draw_layer_image_rect(layer_image[LAYER_FO], LAYER_CHL, 0, 0,
+			      conf_window_width, conf_window_height);
+	draw_layer_image_rect(layer_image[LAYER_FO], LAYER_CHR, 0, 0,
+			      conf_window_width, conf_window_height);
+	draw_layer_image_rect(layer_image[LAYER_FO], LAYER_CHC, 0, 0,
+			      conf_window_width, conf_window_height);
+}
+
+/*
+ * FIレイヤを色で塗り潰す
+ */
+void draw_history_fi(pixel_t color)
+{
+	clear_image_color(layer_image[LAYER_FI], color);
+}
+
+/*
+ * FIレイヤに文字を描画する
+ */
+void draw_char_on_fi(int x, int y, uint32_t wc, int *w, int *h)
+{
+	draw_char_on_layer(LAYER_FI, x, y, wc, w, h);
 }
 
 /*

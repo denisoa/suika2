@@ -215,7 +215,17 @@ bool stop_sound(int n)
  */
 bool set_sound_volume(int n, float vol)
 {
+    /*
+     * pthread_mutex_lock(&mutex);
+     * {
+     */
+
     volume[n] = vol;
+
+    /* 
+     * }
+     * pthread_mutex_unlock(&mutex);
+     */
 
     return true;
 }

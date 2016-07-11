@@ -56,10 +56,14 @@ static bool is_click_visible;
 /* スペースキーによる非表示が実行中であるか */
 static bool is_hidden;
 
+/* ヒストリ画面から戻ったばかりであるか */
+static bool history_flag;
+
 /*
  * 前方参照
  */
 static bool init(void);
+static bool register_message_for_history(void);
 static bool process_serif_command(void);
 static void draw_namebox(void);
 static bool play_voice(void);
@@ -83,11 +87,18 @@ bool message_command(int *x, int *y, int *w, int *h)
 		if (!init())
 			return false;
 
-	/* セーブ画面への遷移を確認する */
+	/* セーブ画面への遷移を処理する */
 	if (is_right_button_pressed) {
 		start_save_mode(false);
 		repeatedly = false;
 		show_click(false);
+		return true;
+	}
+
+	/* ヒストリ画面への遷移を処理する */
+	if (is_up_pressed) {
+		start_history_mode();
+		repeatedly = false;
 		return true;
 	}
 
@@ -141,12 +152,16 @@ bool message_command(int *x, int *y, int *w, int *h)
 /* 初期化処理を行う */
 static bool init(void)
 {
+	/* ヒストリ画面用にメッセージ履歴を登録する */
+	if (!register_message_for_history())
+		return false;
+
 	/* セリフの場合を処理する */
 	process_serif_command();
 
 	/* メッセージを取得する */
 	msg = get_command_type() == COMMAND_MESSAGE ?
-		get_line_string(): get_string_param(SERIF_PARAM_MESSAGE);
+		get_line_string() : get_string_param(SERIF_PARAM_MESSAGE);
 
 	/*メッセージの文字数を求める */
 	total_chars = utf8_chars(msg);
@@ -200,10 +215,38 @@ static bool init(void)
 	return true;
 }
 
-/*
- * セリフコマンドを処理する
- */
-bool process_serif_command(void)
+/* ヒストリ画面用にメッセージ履歴を登録する */
+static bool register_message_for_history(void)
+{
+	const char *name;
+	const char *voice;
+	const char *msg;
+
+	/* ヒストリ画面から戻ったばかりの場合、2重登録を防ぐ */
+	history_flag = check_history_flag();
+	if (history_flag)
+		return true;
+
+	/* 名前、ボイスファイル名、メッセージを取得する */
+	if (get_command_type() == COMMAND_SERIF) {
+		name = get_string_param(SERIF_PARAM_NAME);
+		voice = get_string_param(SERIF_PARAM_VOICE);
+		msg = get_string_param(SERIF_PARAM_MESSAGE);
+	} else {
+		name = NULL;
+		voice = NULL;
+		msg = get_line_string();
+	}
+
+	/* ヒストリ画面用に登録する */
+	if (!register_message(name, msg, voice))
+		return false;
+
+	return true;
+}
+		
+/* セリフコマンドを処理する */
+static bool process_serif_command(void)
 {
 	int namebox_x, namebox_y, namebox_w, namebox_h;
 
@@ -353,8 +396,8 @@ static int get_frame_chars(void)
 		return total_chars;
 	}
 
-	/* セーブ画面から復帰した場合 */
-	if (check_restore_flag()) {
+	/* セーブ画面かヒストリ画面から復帰した場合 */
+	if (check_restore_flag() || history_flag) {
 		/* すべての文字を描画する */
 		return total_chars;
 	}

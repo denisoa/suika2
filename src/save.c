@@ -231,9 +231,7 @@ void start_save_mode(bool load_only)
 	page = 0;
 }
 
-/*
- * セーブ画面を終了する
- */
+/* セーブ画面を終了する */
 static void stop_save_mode(int *x, int *y, int *w, int *h)
 {
 	/* セーブ画面を終了する */

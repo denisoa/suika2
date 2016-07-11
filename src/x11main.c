@@ -664,10 +664,12 @@ static void event_button_press(XEvent *event)
 				     event->xbutton.y);
 		break;
 	case Button4:
-		on_event_mouse_scroll(-1);
+		on_event_key_press(KEY_UP);
+		on_event_key_release(KEY_UP);
 		break;
 	case Button5:
-		on_event_mouse_scroll(1);
+		on_event_key_press(KEY_DOWN);
+		on_event_key_release(KEY_DOWN);
 		break;
 	default:
 		break;

@@ -58,6 +58,9 @@ void draw_stage_rect_with_buttons(int old_x1, int old_y1, int old_w1,
 				  int old_h1, int new_x2, int new_y2,
 				  int new_w2, int new_h2);
 
+/* ステージの背景(FO)と前景(FI)を描画する */
+void draw_stage_history(void);
+
 /*
  * 背景の変更
  */
@@ -182,6 +185,19 @@ void draw_image_to_fo(struct image *img);
 
 /* FIレイヤにイメージを描画する */
 void draw_image_to_fi(struct image *img);
+
+/*
+ * ヒストリの表示
+ */
+
+/* FOレイヤにステージを描画する */
+void draw_history_fo(void);
+
+/* FIレイヤを色で塗り潰す */
+void draw_history_fi(pixel_t color);
+
+/* FIレイヤに文字を描画する */
+void draw_char_on_fi(int x, int y, uint32_t wc, int *w, int *h);
 
 /*
  * 更新領域の計算

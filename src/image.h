@@ -154,6 +154,13 @@ void clear_image_white(struct image *img);
 /* イメージの矩形を白色でクリアする */
 void clear_image_white_rect(struct image *img, int x, int y, int w, int h);
 
+/* イメージを色でクリアする */
+void clear_image_color(struct image *img, pixel_t color);
+
+/* イメージの矩形を色でクリアする */
+void clear_image_color_rect(struct image *img, int x, int y, int w, int h,
+			    pixel_t color);
+
 /* イメージのアルファ値をゼロにする */
 void erase_image_alpha(struct image *img);
 
