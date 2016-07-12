@@ -1,5 +1,5 @@
-Suika 2.0.0-preview8
-====================
+Suika 2.0.0-preview10
+=====================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
 
@@ -7,6 +7,20 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * 自由に使えるアドベンチャーゲーム制作ツールです
     * Windows/Mac/Linuxで動きます
     * 2D/3Dアクセラレーションを使わないため、環境を選ばず動きます
+
+* Windows動作確認リスト
+    * Windows XP 32bit
+    * Windows 7 SP1 32bit
+    * Windows 10 32bit
+
+* Mac動作確認リスト
+    * Mac OS X Snow Leopard 10.6.8
+    * Mac OS X Lion 10.7.5
+    * OS X Mavericks 10.9.5
+    * OS X El Capitan 10.11.5
+
+* Linux動作確認リスト
+    * Ubuntu 16.04 64bit
 
 * Contact
     * 公式WEB http://luxion.jp/s2/
@@ -22,6 +36,10 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * MITライセンスです(COPYINGをご覧ください)
 
 * ChangeLog
+    * Suika 2.0.0-preview10 2016/07/13
+        * ボリューム調整に失敗するバグを修正
+    * Suika 2.0.0-preview9 2016/07/12
+        * 軽微なバグ修正
     * Suika 2.0.0-preview8 2016/07/11
         * メッセージログを実装
     * Suika 2.0.0-preview7 2016/07/09
@@ -40,4 +58,3 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
         * menuコマンドを実装
     * Suika 2.0-preview1 2016/07/04
         * 初公開
-
