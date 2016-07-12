@@ -280,6 +280,8 @@ static BOOL CreateBackImage(void)
 										 pixels);
 	if(BackImage == NULL)
 		return FALSE;
+	if(conf_window_white)
+		clear_image_white(BackImage);
 
 	return TRUE;
 }

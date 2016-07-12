@@ -99,9 +99,11 @@ BOOL isControlPressed;
     }
 #endif
 
-    
     backImage = create_image_with_pixels(conf_window_width, conf_window_height,
                                          (pixel_t *)backImagePixels);
+	if(conf_window_white)
+		clear_image_white(backImage);
+
     if(!init_aunit()) {
         [NSApp terminate:nil];
         return;
