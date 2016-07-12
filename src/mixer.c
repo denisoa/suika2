@@ -124,12 +124,17 @@ void set_mixer_volume(int n, float vol, float span)
 	assert(n < MIXER_STREAMS);
 	assert(vol >= 0 && vol <= 1.0f);
 
-	is_fading[n] = true;
-	vol_start[n] = vol_cur[n];
-	vol_end[n] = vol;
-	vol_span[n] = span;
-
-	reset_stop_watch(&sw[n]);
+	if (span > 0) {
+		is_fading[n] = true;
+		vol_start[n] = vol_cur[n];
+		vol_end[n] = vol;
+		vol_span[n] = span;
+		reset_stop_watch(&sw[n]);
+	} else {
+		is_fading[n] = false;
+		vol_cur[n] = vol;
+		set_sound_volume(n, vol);
+	}
 }
 
 /*
