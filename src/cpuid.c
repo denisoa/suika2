@@ -37,36 +37,54 @@ static void clear_sse_flags_by_os_version(void);
 void x86_check_cpuid_flags(void)
 {
 	uint32_t a, b, c, d;
+	bool has_osxsave;
 
 	/* CPUID命令でベクトル命令のサポートを調べる */
+	asm("cpuid": "=b"(b) : "a"(7), "c"(0));
+	has_avx512 = b & (1 << 16);
+	has_avx2 = b & (1 << 5);
 	asm("cpuid": "=b"(b), "=c"(c), "=d"(d): "a"(1));
 	has_avx = c & (1 << 28);
+	has_osxsave = c & (1 << 27);
 	has_sse42 = c & (1 << 20);
 	has_sse41 = c & (1 << 19);
 	has_sse3 = c & 1;
 	has_sse2 = d & (1 << 26);
 	has_sse = d & (1 << 25);
 	has_mmx = d & (1 << 23);
-	asm("cpuid": "=b"(b) : "a"(7), "c"(0));
-	has_avx512 = b & (1 << 16);
-	has_avx2 = b & (1 << 5);
 
 #ifdef WIN
 	/* WindowsのバージョンによってSSEを無効化する */
 	clear_sse_flags_by_os_version();
 #endif
 
-	/* XSAVE/XRSTORがOSにサポートされているかを調べる */
-	if (has_avx) {
+	/* XGETBV命令がOSでサポートされている場合 */
+	if (has_osxsave) {
 		asm("xgetbv": "=a"(a) : "c"(0));
-		if ((a & 6) != 6) {
+
+		/* ZMMが保存されない場合 */
+		if (has_avx512 && (a & 0xc0) != 0xc0) {
 #ifndef NDEBUG
-			printf("OS doesn't have XSAVE/XRSTOR support.\n");
+			printf("OS disables AVX512F.\n");
+#endif
+			has_avx512 = false;
+		}
+
+		/* YMMが保存されない場合 */
+		if ((has_avx2 || has_avx) && (a & 0x04) != 0x04) {
+#ifndef NDEBUG
+			printf("OS doesn't support AVX/AVX2.\n");
 #endif
 			has_avx = false;
 			has_avx2 = false;
-			has_avx512 = false;
 		}
+	} else {
+#ifndef NDEBUG
+		printf("OS doesn't support XGETBV.\n");
+#endif
+		has_avx512 = false;
+		has_avx2 = false;
+		has_avx = false;
 	}
 
 #ifndef NDEBUG
