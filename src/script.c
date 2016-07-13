@@ -223,6 +223,11 @@ bool move_to_label(const char *UNUSED(label))
 		/* ラベルがみつかった場合 */
 		if (strcmp(c->param[LABEL_PARAM_LABEL], label) == 0) {
 			cur_index = i + 1;
+
+			/* スクリプトの末尾に達した場合 */
+			if (cur_index == cmd_size)
+				return false;
+
 			return true;
 		}
 	}

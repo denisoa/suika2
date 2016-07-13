@@ -201,7 +201,7 @@ static bool init(void)
 	}
 
 	/* 初回に描画する矩形を求める */
-	if (check_menu_finish_flag()) {
+	if (check_menu_finish_flag() || check_retrospect_finish_flag()) {
 		/* メニューコマンドが終了したばかりの場合 */
 		draw_x = 0;
 		draw_y = 0;

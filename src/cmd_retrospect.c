@@ -27,7 +27,7 @@
 #define PARAM_Y(n)	(RETROSPECT_PARAM_LABEL1 + 4 * n + 3)
 
 /* サムネイルの数 */
-static thumbnail_count;
+static int thumbnail_count;
 
 /* サムネイルを隠す色 */
 static pixel_t hide_color;
@@ -76,6 +76,10 @@ bool retrospect_command(int *x, int *y, int *w, int *h)
 	if (!repeatedly)
 		if (!init())
 			return false;
+
+	/* 右クリックによるキャンセルを処理する */
+	if (is_right_button_pressed)
+		return move_to_next_command();
 
 	/* 繰り返し動作を行う */
 	draw_frame(x, y, w, h);
