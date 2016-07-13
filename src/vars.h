@@ -26,6 +26,10 @@ int32_t get_variable(int index);
 /* 変数を設定する */
 void set_variable(int index, int32_t val);
 
-/* TODO: 変数のセーブ */
+/* 変数を文字列で指定して取得する */
+bool get_variable_by_string(const char *var, int32_t *val);
+
+/* 変数を文字列で指定して設定する */
+bool set_variable_by_string(const char *var, int32_t val);
 
 #endif

@@ -37,4 +37,50 @@ void set_variable(int index, int32_t val)
 	var_tbl[index] = val;
 }
 
-/* TODO: 変数のセーブ(シリアライズ) */
+/*
+ * 変数を文字列で指定して取得する
+ */
+bool get_variable_by_string(const char *var, int32_t *val)
+{
+	int index;
+
+	if (var[0] != '$' || strlen(var) == 1) {
+		log_script_not_variable(var);
+		log_script_exec_footer();
+		return false;
+	}
+
+	index = atoi(&var[1]);
+	if (index < 0 || index >= VAR_SIZE) {
+		log_script_var_index(index);
+		log_script_exec_footer();
+		return false;
+	}
+
+	*val = var_tbl[index];
+	return true;
+}
+
+/*
+ * 変数を文字列で指定して設定する
+ */
+bool set_variable_by_string(const char *var, int32_t val)
+{
+	int index;
+
+	if (var[0] != '$' || strlen(var) == 1) {
+		log_script_not_variable(var);
+		log_script_exec_footer();
+		return false;
+	}
+
+	index = atoi(&var[1]);
+	if (index < 0 || index >= VAR_SIZE) {
+		log_script_var_index(index);
+		log_script_exec_footer();
+		return false;
+	}
+
+	var_tbl[index] = val;
+	return true;
+}

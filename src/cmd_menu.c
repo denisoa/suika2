@@ -20,17 +20,16 @@
 /* ボタンの数 */
 #define BUTTON_COUNT	(4)
 
-/* ボタンのインデックス */
-#define BUTTON_ONE	(0)
-#define BUTTON_TWO	(1)
-#define BUTTON_THREE	(2)
-#define BUTTON_FOUR	(3)
+/* コマンドの引数 */
+#define PARAM_LABEL(n)	(MENU_PARAM_LABEL1 + 5 * n)
+#define PARAM_X(n)	(MENU_PARAM_LABEL1 + 5 * n + 1)
+#define PARAM_Y(n)	(MENU_PARAM_LABEL1 + 5 * n + 2)
+#define PARAM_W(n)	(MENU_PARAM_LABEL1 + 5 * n + 3)
+#define PARAM_H(n)	(MENU_PARAM_LABEL1 + 5 * n + 4)
 
-/* ラベル */
-const char *label[BUTTON_COUNT];
-
-/* ボタンの座標 */
+/* ボタン */
 static struct button {
+	const char *label;
 	int x;
 	int y;
 	int w;
@@ -46,7 +45,7 @@ static bool is_first_frame;
 /* ポイントされている項目のインデックス */
 static int pointed_index;
 
-/* メニューコマンドが完了したばかりであるかのフラグ */
+/* menuコマンドが完了したばかりであるかのフラグ */
 static bool menu_finished_flag;
 
 /* 前方参照 */
@@ -81,6 +80,7 @@ bool init(void)
 {
 	const char *file;
 	struct image *img;
+	int i;
 
 	/* 背景を読み込んでFOレイヤに描画する */
 	file = get_string_param(MENU_PARAM_BG_FILE);
@@ -99,26 +99,13 @@ bool init(void)
 	destroy_image(img);
 
 	/* ボタンのラベルと座標をロードする */
-	label[BUTTON_ONE] = get_string_param(MENU_PARAM_LABEL1);
-	button[BUTTON_ONE].x = get_int_param(MENU_PARAM_X1);
-	button[BUTTON_ONE].y = get_int_param(MENU_PARAM_Y1);
-	button[BUTTON_ONE].w = get_int_param(MENU_PARAM_W1);
-	button[BUTTON_ONE].h = get_int_param(MENU_PARAM_H1);
-	label[BUTTON_TWO] = get_string_param(MENU_PARAM_LABEL2);
-	button[BUTTON_TWO].x = get_int_param(MENU_PARAM_X2);
-	button[BUTTON_TWO].y = get_int_param(MENU_PARAM_Y2);
-	button[BUTTON_TWO].w = get_int_param(MENU_PARAM_W2);
-	button[BUTTON_TWO].h = get_int_param(MENU_PARAM_H2);
-	label[BUTTON_THREE] = get_string_param(MENU_PARAM_LABEL3);
-	button[BUTTON_THREE].x = get_int_param(MENU_PARAM_X3);
-	button[BUTTON_THREE].y = get_int_param(MENU_PARAM_Y3);
-	button[BUTTON_THREE].w = get_int_param(MENU_PARAM_W3);
-	button[BUTTON_THREE].h = get_int_param(MENU_PARAM_H3);
-	label[BUTTON_FOUR] = get_string_param(MENU_PARAM_LABEL4);
-	button[BUTTON_FOUR].x = get_int_param(MENU_PARAM_X4);
-	button[BUTTON_FOUR].y = get_int_param(MENU_PARAM_Y4);
-	button[BUTTON_FOUR].w = get_int_param(MENU_PARAM_W4);
-	button[BUTTON_FOUR].h = get_int_param(MENU_PARAM_H4);
+	for (i = 0; i < BUTTON_COUNT; i++) {
+		button[i].label = get_string_param(PARAM_LABEL(i));
+		button[i].x = get_int_param(PARAM_X(i));
+		button[i].y = get_int_param(PARAM_Y(i));
+		button[i].w = get_int_param(PARAM_W(i));
+		button[i].h = get_int_param(PARAM_H(i));
+	}
 
 	/* 繰り返し動作を開始する */
 	repeatedly = true;
@@ -251,7 +238,7 @@ static int get_pointed_index(void)
 {
 	int i;
 
-	for (i = BUTTON_ONE; i <= BUTTON_FOUR; i++) {
+	for (i = 0; i < BUTTON_COUNT; i++) {
 		if (mouse_pos_x >= button[i].x &&
 		    mouse_pos_x < button[i].x + button[i].w &&
 		    mouse_pos_y >= button[i].y &&
@@ -266,8 +253,6 @@ static bool cleanup(void)
 {
 	assert(pointed_index != -1);
 
-	/* TODO: ロード画面を呼び出す特殊なラベルを用意する */
-
 	/* ステージの画像を無効にする */
 	change_bg_immediately(NULL);
 	change_ch_immediately(CH_BACK, NULL, 0, 0);
@@ -279,7 +264,7 @@ static bool cleanup(void)
 	menu_finished_flag = true;
 	
 	/* ラベルにジャンプする */
-	return move_to_label(label[pointed_index]);
+	return move_to_label(button[pointed_index].label);
 }
 
 /*

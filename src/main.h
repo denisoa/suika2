@@ -53,6 +53,12 @@ bool if_command(void);
 bool select_command(int *x, int *y, int *w, int *h);
 bool se_command(void);
 bool menu_command(int *x, int *y, int *w, int *h);
+bool retrospect_command(int *x, int *y, int *w, int *h);
+
+/*
+ * コマンドが終了した直後であるかのチェック
+ */
 bool check_menu_finish_flag(void);
-	
+bool check_retrospect_finish_flag(void);
+
 #endif

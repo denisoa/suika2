@@ -17,10 +17,6 @@
 #include "platform.h"
 #include "script.h"
 
-#ifdef __llvm__
-//#pragma GCC diagnostic ignored "-Winvalid-source-encoding"
-#endif
-
 /*
  * APIのエラーを記録する
  */
@@ -134,6 +130,22 @@ void log_script_no_command(const char *file)
 }
 
 /*
+ * 左辺値が変数でないエラーを記録する
+ */
+void log_script_not_variable(const char *name)
+{
+	log_error("変数名ではない名前(%s)が指定されました。\n", name);
+}
+
+/*
+ * サイズに正の値が指定されなかったエラーを記録する
+ */
+void log_script_non_positive_size(int val)
+{
+	log_error("サイズに正の値が指定されませんでした。(%)\n", val);
+}
+
+/*
  * スクリプトのパラメータが足りないエラーを記録する
  */
 void log_script_too_few_param(int min, int real)
@@ -166,6 +178,12 @@ void log_script_parse_footer(const char *file, int line, const char *buf)
 {
 	log_error("> スクリプト書式エラー: %s %d行目\n", file, line);
 	log_error("> %s\n", buf);
+}
+
+/* RGB値が負であるエラーを記録する */
+void log_script_rgb_negative(int val)
+{
+	log_error("RGB値が負の数(%d)が指定されました。\n", val);
 }
 
 /* スクリプトが長すぎるエラーを記録する */

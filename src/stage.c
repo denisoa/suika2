@@ -969,7 +969,7 @@ int draw_char_on_fo_fi(int x, int y, uint32_t wc)
 }
 
 /*
- * メニューの描画
+ * メニュー画面・CG回想画面の描画
  */
 
 /*
@@ -991,7 +991,15 @@ void draw_image_to_fi(struct image *img)
 }
 
 /*
- * ヒストリの表示
+ * FOレイヤに矩形を描画する
+ */
+void draw_rect_to_fo(int x, int y, int w, int h, pixel_t color)
+{
+	clear_image_color_rect(layer_image[LAYER_FO], x, y, w, h, color);
+}
+
+/*
+ * ヒストリ画面の表示
  */
 
 /*

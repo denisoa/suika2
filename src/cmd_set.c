@@ -34,7 +34,7 @@ bool set_command(void)
 		return false;
 	}
 	lval_index = atoi(&lhs[1]);
-	if (lval_index >= VAR_SIZE) {
+	if (lval_index < 0 || lval_index >= VAR_SIZE) {
 		log_script_var_index(lval_index);
 		log_script_exec_footer();
 		return false;

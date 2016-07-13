@@ -57,6 +57,7 @@ struct insn_item {
 	{"@select", COMMAND_SELECT, 6, 6},
 	{"@se", COMMAND_SE, 1, 1},
 	{"@menu", COMMAND_MENU, 7, 22},
+	{"@retrospect", COMMAND_RETROSPECT, 11, 55},
 };
 
 #define INSN_TBL_SIZE	(sizeof(insn_tbl) / sizeof(struct insn_item))

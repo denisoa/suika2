@@ -177,7 +177,7 @@ void clear_save_stage(void);
 int draw_char_on_fo_fi(int x, int y, uint32_t wc);
 
 /*
- * メニューの描画
+ * メニュー画面・CG回想画面の描画
  */
 
 /* FOレイヤにイメージを描画する */
@@ -186,8 +186,11 @@ void draw_image_to_fo(struct image *img);
 /* FIレイヤにイメージを描画する */
 void draw_image_to_fi(struct image *img);
 
+/* FOレイヤに矩形を描画する */
+void draw_rect_to_fo(int x, int y, int w, int h, pixel_t color);
+
 /*
- * ヒストリの表示
+ * ヒストリ画面の表示
  */
 
 /* FOレイヤにステージを描画する */

@@ -8,6 +8,7 @@ SRCS_COMMON = \
 	../../src/cmd_load.c \
 	../../src/cmd_menu.c \
 	../../src/cmd_message.c \
+	../../src/cmd_retrospect.c \
 	../../src/cmd_se.c \
 	../../src/cmd_select.c \
 	../../src/cmd_set.c \
