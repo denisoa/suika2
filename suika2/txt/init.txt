@@ -1,8 +1,3 @@
-@set $1 = 1
-@retrospect white.png black.png 0 0 255 320 240 END $1 640 480
-キャンセルされました
-@goto END
-
 ###
 ### ロゴ
 ###

@@ -1,4 +1,4 @@
-Suika 2.0.0-preview10
+Suika 2.0.0-preview11
 =====================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
@@ -36,6 +36,9 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * MITライセンスです(COPYINGをご覧ください)
 
 * ChangeLog
+    * Suika 2.0.0-preview11 2016/07/14
+        * CG回想モード用のコマンド(@retrospect)を追加
+        * AVX命令を使用できないケースの判定を修正
     * Suika 2.0.0-preview10 2016/07/13
         * ボリューム調整に失敗するバグを修正
     * Suika 2.0.0-preview9 2016/07/12
