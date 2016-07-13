@@ -28,7 +28,7 @@ bool has_sse;
 bool has_mmx;
 
 #ifdef _WIN32
-static void reset_flags_by_win_ver(void);
+static void clear_sse_flags_by_os_version(void);
 #endif
 
 /*
@@ -36,8 +36,9 @@ static void reset_flags_by_win_ver(void);
  */
 void x86_check_cpuid_flags(void)
 {
-	uint32_t b, c, d;
+	uint32_t a, b, c, d;
 
+	/* CPUID命令でベクトル命令のサポートを調べる */
 	asm("cpuid": "=b"(b), "=c"(c), "=d"(d): "a"(1));
 	has_avx = c & (1 << 28);
 	has_sse42 = c & (1 << 20);
@@ -46,15 +47,29 @@ void x86_check_cpuid_flags(void)
 	has_sse2 = d & (1 << 26);
 	has_sse = d & (1 << 25);
 	has_mmx = d & (1 << 23);
-
 	asm("cpuid": "=b"(b) : "a"(7), "c"(0));
 	has_avx512 = b & (1 << 16);
 	has_avx2 = b & (1 << 5);
 
-#ifdef _WIN32
-	reset_flags_by_win_ver();
+#ifdef WIN
+	/* WindowsのバージョンによってSSEを無効化する */
+	clear_sse_flags_by_os_version();
 #endif
 
+	/* XSAVE/XRSTORがOSにサポートされているかを調べる */
+	if (has_avx) {
+		asm("xgetbv": "=a"(a) : "c"(0));
+		if ((a & 6) != 6) {
+#ifndef NDEBUG
+			printf("OS doesn't have XSAVE/XRSTOR support.\n");
+#endif
+			has_avx = false;
+			has_avx2 = false;
+			has_avx512 = false;
+		}
+	}
+
+#ifndef NDEBUG
 	printf("AVX512\t%d\n", has_avx512);
 	printf("AVX2\t%d\n", has_avx2);
 	printf("AVX\t%d\n", has_avx);
@@ -64,13 +79,14 @@ void x86_check_cpuid_flags(void)
 	printf("SSE2\t%d\n", has_sse2);
 	printf("SSE\t%d\n", has_sse);
 	printf("MMX\t%d\n", has_mmx);
+#endif
 }
 
-#ifdef _WIN32
+#ifdef WIN
 /*
- * Windowsのバージョンごとにベクトル命令を無効化する
+ * Windowsのバージョンでベクトル命令を無効化する
  */
-static void reset_flags_by_win_ver()
+static void clear_sse_flags_by_os_version(void)
 {
 	OSVERSIONINFO vi;
 	DWORD dwMajor, dwMinor, dwBuild;
@@ -91,17 +107,6 @@ static void reset_flags_by_win_ver()
 	dwMajor = vi.dwMajorVersion;
 	dwMinor = vi.dwMinorVersion;
 	dwBuild = vi.dwBuildNumber;
-
-	/* FIXME: AVX-512fに対応するOSバージョンは？ */
-
-	/* Windows 7 SP1より前の場合、AVX系命令を無効にする */
-	if (dwMajor < 6 ||
-	    (dwMajor == 6 && dwMinor < 1) ||
-	    (dwMajor == 6 && dwMinor == 1 && dwBuild < 7601)) {
-		has_avx512 = false;
-		has_avx2 = false;
-		has_avx = false;
-	}
 
 	/* Windows 98 SEより前の場合、全てのSSE系命令を無効にする */
 	if (dwMajor < 4 ||
