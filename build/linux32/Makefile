@@ -17,7 +17,9 @@ CPPFLAGS = \
 #
 
 CFLAGS = \
-	-O3 \
+	-O0 \
+	-g3 \
+	-ftree-vectorize \
 	-fopt-info-vec \
 	-std=gnu89 \
 	-Wall \
@@ -43,31 +45,13 @@ LDFLAGS = \
 # Source files
 #
 
+include ../common.mk
+
 SRCS = \
-	../../src/cpuid.c \
-	../../src/novec.c \
-	../../src/sse.c \
-	../../src/sse2.c \
-	../../src/sse3.c \
-	../../src/sse41.c \
-	../../src/sse42.c \
-	../../src/avx.c \
-	../../src/avx2.c \
-	../../src/avx512.c \
-	../../src/x11main.c \
-	../../src/asound.c \
-	../../src/image.c \
-	../../src/readimage.c \
-	../../src/glyph.c \
-	../../src/wave.c \
-	../../src/script.c \
-	../../src/log.c \
-	../../src/stage.c \
-	../../src/suika.c \
-	../../src/cmd_bg.c \
-	../../src/cmd_bgm.c \
-	../../src/cmd_ch.c \
-	../../src/cmd_click.c
+$(SRCS_COMMON) \
+$(SRCS_SSE) \
+../../src/asound.c \
+../../src/x11main.c
 
 #
 # .c.o compilation rules
@@ -76,7 +60,7 @@ SRCS = \
 OBJS = $(SRCS:../../src/%.c=%.o) \
 
 %.o: ../../src/%.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
+	$(CC) -c $(CPPFLAGS) -O0 $(CFLAGS) $<
 
 #
 # Target
@@ -92,29 +76,7 @@ libroot/include/zlib.h:
 # Feature specific source files.
 #
 
-novec.o: ../../src/novec.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) -fno-tree-vectorize $<
-
-sse2.o: ../../src/sse2.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) -ftree-vectorize -msse2 $<
-
-sse3.o: ../../src/sse3.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) -ftree-vectorize -msse3 $<
-
-sse41.o: ../../src/sse41.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) -ftree-vectorize -msse4.1 $<
-
-sse42.o: ../../src/sse42.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) -ftree-vectorize -msse4.2 $<
-
-avx.o: ../../src/avx.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) -ftree-vectorize -mavx $<
-
-avx2.o: ../../src/avx2.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) -ftree-vectorize -mavx2 $<
-
-avx512.o: ../../src/avx512.c
-	$(CC) -c $(CPPFLAGS) $(CFLAGS) -ftree-vectorize -mavx512f $<
+include ../sse.mk
 
 #
 # Phony
@@ -128,3 +90,8 @@ clean:
 
 erase:
 	rm -rf libroot
+
+lines:
+	cat ../../src/*.[chm] | wc -l
+	grep -E '/\*|\*/|^([ \t]+\*)' ../../src/*.[cm] | wc -l
+	grep 'assert' ../../src/*.[chm] | wc -l

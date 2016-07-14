@@ -1,4 +1,4 @@
-Suika 2.0.0-preview11
+Suika 2.0.0-preview12
 =====================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
@@ -27,15 +27,21 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * 連絡先 tabata at luxion dot jp
     * まだ公開したばかりなので、なんでも連絡してくださるとうれしいです
 
+* Install/Uninstall
+    * ZIPファイルを展開したフォルダをそのままご使用ください
+    * 不要になりましたらフォルダごと削除してください
+
 * Credit
     * 音楽 80 Copyright (C) 2016 80. All rights reserved.
     * 音楽 krol様
-    * ボイス しぐれるぅ。様
+    * みどり役CV しぐれるぅ。様
 
 * License
     * MITライセンスです(COPYINGをご覧ください)
 
 * ChangeLog
+    * Suika 2.0.0-preview12 2016/07/14
+        * サンプルゲームを更新
     * Suika 2.0.0-preview11 2016/07/14
         * CG回想モード用のコマンド(@retrospect)を追加
         * AVX命令を使用できないケースの判定を修正
