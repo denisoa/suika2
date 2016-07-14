@@ -59,6 +59,9 @@ static bool is_hidden;
 /* ヒストリ画面から戻ったばかりであるか */
 static bool history_flag;
 
+/* セーブ画面から戻ったばかりであるか */
+static bool restore_flag;
+
 /*
  * 前方参照
  */
@@ -228,6 +231,11 @@ static bool register_message_for_history(void)
 	if (history_flag)
 		return true;
 
+	/* セーブ画面から戻ったばかりの場合、2重登録を防ぐ */
+	restore_flag = check_restore_flag();
+	if (restore_flag)
+		return true;
+
 	/* 名前、ボイスファイル名、メッセージを取得する */
 	if (get_command_type() == COMMAND_SERIF) {
 		name = get_string_param(SERIF_PARAM_NAME);
@@ -267,7 +275,7 @@ static bool process_serif_command(void)
 	}
 
 	/* ボイスを再生する */
-	if (!is_control_pressed && !history_flag)
+	if (!is_control_pressed && !history_flag && !restore_flag)
 		if (!play_voice())
 			return false;
 
@@ -400,7 +408,7 @@ static int get_frame_chars(void)
 	}
 
 	/* セーブ画面かヒストリ画面から復帰した場合 */
-	if (check_restore_flag() || history_flag) {
+	if (restore_flag || history_flag) {
 		/* すべての文字を描画する */
 		return total_chars;
 	}

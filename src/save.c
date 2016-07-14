@@ -511,6 +511,7 @@ static void process_left_press(int new_pointed_index, int *x, int *y, int *w,
 	if (new_pointed_index == BUTTON_SAVE) {
 		process_save();
 		stop_save_mode(x, y, w, h);
+		restore_flag = true;
 	}
 
 	/* ロードボタンの場合 */
@@ -783,9 +784,9 @@ static bool deserialize_stage(struct rfile *rf)
 	change_bg_immediately(img);
 
 	for (i = CH_BACK; i <= CH_CENTER; i++) {
-		if (read_rfile(rf, &n, sizeof(m)) < sizeof(n))
+		if (read_rfile(rf, &m, sizeof(m)) < sizeof(n))
 			return false;
-		if (read_rfile(rf, &m, sizeof(n)) < sizeof(m))
+		if (read_rfile(rf, &n, sizeof(n)) < sizeof(m))
 			return false;
 		if (gets_rfile(rf, s, sizeof(s)) == NULL)
 			return false;
