@@ -443,6 +443,7 @@ static VOID StopSoundBuffer(int nBuffer)
 		{
 			/* 再生を停止する */
 			IDirectSoundBuffer_Stop(pDSBuffer[nBuffer]);
+			IDirectSoundBuffer_SetCurrentPosition(pDSBuffer[nBuffer], 0);
 
 			/* ストリームを停止状態にする */
 			pStream[nBuffer] = NULL;
@@ -637,6 +638,7 @@ static VOID OnNotifyPlayPos(int nBuffer)
 	{
 		/* 再生を停止する */
 		IDirectSoundBuffer_Stop(pDSBuffer[nBuffer]);
+		IDirectSoundBuffer_SetCurrentPosition(pDSBuffer[nBuffer], 0);
 
 		/* ストリームを停止状態にする */
 		pStream[nBuffer] = NULL;
