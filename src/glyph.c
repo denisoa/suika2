@@ -22,10 +22,13 @@
 
 static FT_Library library;
 static FT_Face face;
+static FT_Byte *font_file_content;
+static FT_Long font_file_size;
 
 /*
  * 前方参照
  */
+static bool read_font_file_content(void);
 static void draw_glyph_func(unsigned char * RESTRICT font, int font_width,
 			    int font_height, int margin_left, int margin_top,
 			    pixel_t * RESTRICT image, int image_width,
@@ -37,7 +40,6 @@ static void draw_glyph_func(unsigned char * RESTRICT font, int font_width,
  */
 bool init_glyph(void)
 {
-	char *path;
 	FT_Error err;
 
 	/* FreeType2ライブラリを初期化する */
@@ -47,21 +49,17 @@ bool init_glyph(void)
 		return false;
 	}
 
-	/* フォントファイルのパスを生成する */
-	path = make_valid_path(FONT_DIR, conf_font_file);
-	if (path == NULL) {
-		log_memory();
+	/* フォントファイルの内容を読み込む */
+	if (!read_font_file_content())
 		return false;
-	}
-
+	
 	/* フォントファイルを読み込む */
-	err = FT_New_Face(library, path, 0, &face);
+	err = FT_New_Memory_Face(library, font_file_content, font_file_size,
+				 0, &face);
 	if (err != 0) {
 		log_font_file_error(conf_font_file);
-		free(path);
 		return false;
 	}
-	free(path);
 
 	/* 文字サイズをセットする */
 	err = FT_Set_Pixel_Sizes(face, 0, (FT_UInt)conf_font_size);
@@ -74,6 +72,53 @@ bool init_glyph(void)
 	return true;
 }
 
+/* フォントファイルの内容を読み込む */
+static bool read_font_file_content(void)
+{
+	struct rfile *rf;
+	FT_Long remain, block;
+
+	/* フォントファイルを開く */
+	rf = open_rfile(FONT_DIR, conf_font_file, false);
+	if (rf == NULL)
+		return false;
+
+	/* フォントファイルのサイズを取得する */
+	font_file_size = (FT_Long)get_rfile_size(rf);
+	if (font_file_size == 0) {
+		log_font_file_error(conf_font_file);
+		close_rfile(rf);
+		return false;
+	}
+
+	/* メモリを確保する */
+	font_file_content = (FT_Byte *)malloc((size_t)font_file_size);
+	if (font_file_content == NULL) {
+		log_memory();
+		close_rfile(rf);
+		return false;
+	}
+
+	/* ファイルの内容を読み込む */
+	remain = font_file_size;
+	while (remain > 0) {
+		block = (FT_Long)read_rfile(rf, font_file_content,
+					    (size_t)remain);
+		if (block == 0)
+			break;
+		assert(block <= remain);
+		remain -= block;
+	}
+	if (remain > 0) {
+		log_font_file_error(conf_font_file);
+		close_rfile(rf);
+		return false;
+	}
+	close_rfile(rf);
+
+	return true;
+}
+
 /*
  * フォントレンダラの終了処理を行う
  */
@@ -81,6 +126,8 @@ void cleanup_glyph(void)
 {
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
+	if (font_file_content != NULL)
+		free(font_file_content);
 }
 
 /*

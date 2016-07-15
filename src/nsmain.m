@@ -359,6 +359,10 @@ int main()
     if (!openLog())
         return 1;
 
+    // パッケージの初期化処理を行う
+    if (!init_file())
+        return 1;
+
     // コンフィグの初期化処理を行う
     if (!init_conf())
         return 1;
@@ -500,7 +504,13 @@ char *make_valid_path(const char *dir, const char *fname)
 
     NSString *base = [[[NSBundle mainBundle] bundlePath]
                          stringByDeletingLastPathComponent];
-    NSString *path = [NSString stringWithFormat:@"%@/%s/%s", base, dir, fname];
+
+    NSString *path;
+    if (dir != NULL)
+        path = [NSString stringWithFormat:@"%@/%s/%s", base, dir, fname];
+    else
+        path = [NSString stringWithFormat:@"%@/%s", base, fname];
+
     const char *cstr = [path UTF8String];
     ret = strdup(cstr);
 

@@ -26,9 +26,24 @@ struct rfile;
 struct wfile;
 
 /*
+ * ファイル読み書きの初期化処理を行う
+ */
+bool init_file(void);
+
+/*
+ * ファイル読み書きの初期化処理を行う
+ */
+void cleanup_file(void);
+
+/*
  * ファイル読み込みストリームを開く
  */
-struct rfile *open_rfile(const char *dir, const char *file, bool no_error);
+struct rfile *open_rfile(const char *dir, const char *file, bool save_data);
+
+/*
+ * ファイルのサイズを取得する
+ */
+size_t get_rfile_size(struct rfile *rf);
 
 /*
  * ファイル読み込みストリームから読み込む

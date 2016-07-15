@@ -17,8 +17,7 @@ CPPFLAGS = \
 #
 
 CFLAGS = \
-	-O0 \
-	-g3 \
+	-O3 \
 	-ftree-vectorize \
 	-fopt-info-vec \
 	-std=gnu89 \
@@ -60,7 +59,7 @@ $(SRCS_SSE) \
 OBJS = $(SRCS:../../src/%.c=%.o) \
 
 %.o: ../../src/%.c
-	$(CC) -c $(CPPFLAGS) -O0 $(CFLAGS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 
 #
 # Target

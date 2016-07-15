@@ -16,7 +16,10 @@ struct image;
 /* PCMストリーム */
 struct wave;
 
-/* ログを出力する */
+/*
+ * ログを出力する
+ *  - ログを出力してよいのはメインスレッドのみとする
+ */
 bool log_info(const char *s, ...);
 bool log_warn(const char *s, ...);
 bool log_error(const char *s, ...);

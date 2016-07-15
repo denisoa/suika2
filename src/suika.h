@@ -87,6 +87,9 @@
 /* ログファイル名 */
 #define LOG_FILE	"log.txt"
 
+/* パッケージファイル名 */
+#define PACKAGE_FILE	"data01.arc"
+
 /* 設定ファイル名 */
 #define PROP_FILE	"config.txt"
 

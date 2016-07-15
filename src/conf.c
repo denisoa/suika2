@@ -13,7 +13,7 @@
 #include "suika.h"
 
 /*
- * ウィンドウのコンフィグ
+ * ウィンドウの設定
  */
 char *conf_window_title;
 int conf_window_width;
@@ -215,11 +215,11 @@ struct rule {
  * 前方参照
  */
 static bool read_conf(void);
-static bool save_property(const char *k, const char *v);
+static bool save_value(const char *k, const char *v);
 static bool check_conf(void);
 
 /*
- * プロパティの初期化処理を行う
+ * コンフィグの初期化処理を行う
  */
 bool init_conf(void)
 {
@@ -238,33 +238,16 @@ bool init_conf(void)
 static bool read_conf(void)
 {
 	char buf[BUF_SIZE];
-	FILE *fp;
-	char *path, *tail, *k, *v;
+	struct rfile *rf;
+	char *k, *v;
 
-	path = make_valid_path(CONF_DIR, PROP_FILE);
-	if (path == NULL)
+	rf = open_rfile(CONF_DIR, PROP_FILE, false);
+	if (rf == NULL)
 		return false;
 
-	fp = fopen(path, "rb");
-	if (fp == NULL) {
-		free(path);
-		return false;
-	}
-	free(path);
-
-	while (fgets(buf, sizeof(buf), fp) != NULL) {
-		if (buf[0] == '#')
+	while (gets_rfile(rf, buf, sizeof(buf)) != NULL) {
+		if (buf[0] == '#' || buf[0] == '\0')
 			continue;
-
-		/* 行末の'\n'を'\0'で上書きする */
-		tail = strchr(buf, '\n');
-		if (tail != NULL)
-			*tail = '\0';
-
-		/* 行末の'\r'を'\0'で上書きする */
-		tail = strchr(buf, '\r');
-		if (tail != NULL)
-			*tail = '\0';
 
 		/* キーを取得する */
 		k = strtok(buf, "=");
@@ -276,15 +259,15 @@ static bool read_conf(void)
 		if (v == NULL || v[0] == '\0')
 			continue;
 
-		/* プロパティを保存する */
-		if (!save_property(k, v))
+		/* 値を保存する */
+		if (!save_value(k, v))
 			return false;
 	}
 	return true;
 }
 
-/* プロパティの値を保存する */
-static bool save_property(const char *k, const char *v)
+/* 値を保存する */
+static bool save_value(const char *k, const char *v)
 {
 	char *dup;
 	size_t i;
@@ -314,18 +297,18 @@ static bool save_property(const char *k, const char *v)
 
 		return true;
 	}
-	log_unknown_property(k);
+	log_unknown_conf(k);
 	return false;
 }
 
-/* 読み込まれなかった必須プロパティをチェックする */
+/* 読み込まれなかった必須コンフィグをチェックする */
 bool check_conf(void)
 {
 	size_t i;
 
 	for (i = 0; i < RULE_TBL_SIZE; i++) {
 		if (!rule_tbl[i].omissible && !rule_tbl[i].loaded) {
-			log_undefined_property(rule_tbl[i].key);
+			log_undefined_conf(rule_tbl[i].key);
 			return false;
 		}
 	}

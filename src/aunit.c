@@ -230,6 +230,10 @@ bool set_sound_volume(int n, float vol)
     return true;
 }
 
+/*
+ * コールバックスレッド
+ */
+
 /* コールバック */
 static OSStatus callback(void *inRef,
                          AudioUnitRenderActionFlags *ioActionFlags,
@@ -282,8 +286,7 @@ static OSStatus callback(void *inRef,
                                 wave[SE_STREAM] != NULL;
                     if(!isPlaying) {
                         /* 再生を停止する */
-                        if(AudioOutputUnitStop(au) != noErr)
-                            log_api_error("AudioOutputUnitStop");
+                        AudioOutputUnitStop(au);
                         break;
                     }
                 }

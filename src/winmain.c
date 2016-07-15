@@ -120,6 +120,10 @@ static BOOL InitApp(HINSTANCE hInstance, int nCmdShow)
 	if(!OpenLogFile())
 		return FALSE;
 
+	/* パッケージの初期化処理を行う */
+	if(!init_file())
+		return FALSE;
+
 	/* コンフィグの初期化処理を行う */
 	if(!init_conf())
 		return FALSE;
@@ -563,6 +567,9 @@ char *make_valid_path(const char *dir, const char *fname)
 	char *buf;
 	size_t len;
 
+	if (dir == NULL)
+		dir = "";
+
 	/* パスのメモリを確保する */
 	len = strlen(dir) + 1 + strlen(fname) + 1;
 	buf = malloc(len);
@@ -570,7 +577,8 @@ char *make_valid_path(const char *dir, const char *fname)
 		return NULL;
 
 	strcpy(buf, dir);
-	strcat(buf, "/");
+	if (strlen(dir) != 0)
+		strcat(buf, "\\");
 	strcat(buf, fname);
 
 	return buf;

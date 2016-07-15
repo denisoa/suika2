@@ -82,6 +82,7 @@ OBJS = \
 #
 
 Suika.app/Contents/MacOS/Suika: $(OBJS)
+	mkdir -p Suika.app/Contents/MacOS
 	$(CC) -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS)
 
 libroot/include/zlib.h:

@@ -238,8 +238,10 @@ static bool init_pcm(int n)
 
 	/* デバイスをオープンする */
 	ret = snd_pcm_open(&pcm[n], "default", SND_PCM_STREAM_PLAYBACK, 0);
-	if (ret < 0)
+	if (ret < 0) {
+		log_api_error("snd_pcm_open");
 		return false;
+	}
 
 	/*
 	 * フォーマットを設定する
@@ -247,25 +249,42 @@ static bool init_pcm(int n)
 
 	snd_pcm_hw_params_alloca(&params);
 	ret = snd_pcm_hw_params_any(pcm[n], params);
-	if (ret < 0)
+	if (ret < 0) {
+		log_api_error("snd_pcm_hw_params_any");
 		return false;
+	}
 	
 	if (snd_pcm_hw_params_set_access(pcm[n], params,
-					 SND_PCM_ACCESS_RW_INTERLEAVED) < 0)
+					 SND_PCM_ACCESS_RW_INTERLEAVED) < 0) {
+		log_api_error("snd_pcm_hw_params_set_access");
 		return false;
+	}
 	if (snd_pcm_hw_params_set_format(pcm[n], params,
-					 SND_PCM_FORMAT_S16_LE) < 0)
+					 SND_PCM_FORMAT_S16_LE) < 0) {
+		log_api_error("snd_pcm_hw_params_set_format");
 		return false;
-	if (snd_pcm_hw_params_set_rate(pcm[n], params, SAMPLING_RATE, 0) < 0)
+	}
+	if (snd_pcm_hw_params_set_rate(pcm[n], params, SAMPLING_RATE, 0) < 0) {
+		log_api_error("snd_pcm_hw_params_set_rate");
 		return false;
-	if (snd_pcm_hw_params_set_channels(pcm[n], params, 2) < 0)
+	}
+	if (snd_pcm_hw_params_set_channels(pcm[n], params, 2) < 0) {
+		log_api_error("snd_pcm_hw_params_set_channels");
 		return false;
-	if (snd_pcm_hw_params_set_periods(pcm[n], params, PERIODS, 0) < 0)
+	}
+	if (snd_pcm_hw_params_set_periods(pcm[n], params, PERIODS, 0) < 0) {
+		log_api_error("snd_pcm_hw_params_set_periods");
 		return false;
-	if (snd_pcm_hw_params_set_buffer_size(pcm[n], params, BUF_FRAMES) < 0)
+	}
+	if (snd_pcm_hw_params_set_buffer_size(pcm[n], params, BUF_FRAMES) <
+	    0) {
+		log_api_error("snd_pcm_hw_params_set_buffer_size");
 		return false;
-	if (snd_pcm_hw_params(pcm[n], params) < 0)
+	}
+	if (snd_pcm_hw_params(pcm[n], params) < 0) {
+		log_api_error("snd_pcm_hw_params");
 		return false;
+	}
 
 	return true;
 }

@@ -46,7 +46,7 @@ void log_ch_position(const char *pos)
  */
 void log_file_open(const char *fname)
 {
-	log_error("ファイル\"%s\"がみつかりません。\n", fname);
+	log_error("ファイル\"%s\"を開けません。\n", fname);
 }
 
 /*
@@ -71,6 +71,14 @@ void log_image_file_error(const char *dir, const char *file)
 void log_memory(void)
 {
 	log_error("メモリの確保に失敗しました。\n");
+}
+
+/*
+ * パッケージファイルのエラーを記録する
+ */
+void log_package_file_error(void)
+{
+	log_error("パッケージファイルの読み込みに失敗しました。\n");
 }
 
 /*
@@ -199,16 +207,16 @@ void log_script_var_index(int index)
 	log_error("変数インデックス%dは範囲外です。\n", index);
 }
 
-/* 未定義のプロパティを記録する */
-void log_undefined_property(const char *key)
+/* 未定義のコンフィグを記録する */
+void log_undefined_conf(const char *key)
 {
-	log_error("コンフィグのプロパティ%sが記述されていません。\n", key);
+	log_error("コンフィグに%sが記述されていません。\n", key);
 }
 
-/* 不明なプロパティを記録する */
-void log_unknown_property(const char *key)
+/* 不明なコンフィグを記録する */
+void log_unknown_conf(const char *key)
 {
-	log_error("コンフィグのプロパティ%sは認識されません。\n", key);
+	log_error("コンフィグの%sは認識されません。\n", key);
 }
 
 /* 音声ファイルの入力エラーを記録する */

@@ -32,7 +32,7 @@ bool on_event_init(void)
 	if (!init_stage())
 		return false;
 
-	/* デーブデータ関連の初期化を行う */
+	/* セーブデータ関連の初期化を行う */
 	init_save();
 
 	/* 初期スクリプトをロードする */

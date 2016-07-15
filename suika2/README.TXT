@@ -1,4 +1,4 @@
-Suika 2.0.0-preview12
+Suika 2.0.0-preview13
 =====================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
@@ -34,14 +34,18 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
 * Credit
     * 音楽 80 Copyright (C) 2016 80. All rights reserved.
     * 音楽 krol様
-    * みどり役CV しぐれるぅ。様
+    * CV しぐれるぅ。様
 
 * License
     * MITライセンスです(COPYINGをご覧ください)
 
 * ChangeLog
+    * Suika 2.0.0-preview13 2016/07/15
+        * アーカイブ機能を追加、これにて2.0.0必須機能の追加を終了
     * Suika 2.0.0-preview12 2016/07/14
-        * サンプルゲームを更新
+        * サンプルゲームを更新(タイトル画面などは未更新)
+        * Windowsで音声が途切れるバグを修正
+        * セーブ画面から戻った際にボイスが再度読まれるバグを修正
     * Suika 2.0.0-preview11 2016/07/14
         * CG回想モード用のコマンド(@retrospect)を追加
         * AVX命令を使用できないケースの判定を修正
