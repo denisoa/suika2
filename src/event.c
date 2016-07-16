@@ -16,6 +16,9 @@
 
 #include "suika.h"
 
+/* False assertion */
+#define INVALID_KEYCODE	(0)
+
 /*
  * プラットフォーム非依存な初期化処理を行う
  */
@@ -96,23 +99,14 @@ void on_event_key_press(int key)
 	case KEY_RETURN:
 		is_return_pressed = true;
 		break;
-	case KEY_ESCAPE:
-		is_escape_pressed = true;
-		break;
 	case KEY_UP:
 		is_up_pressed = true;
 		break;
 	case KEY_DOWN:
 		is_down_pressed = true;
 		break;
-	case KEY_PAGE_UP:
-		is_page_up_pressed = true;
-		break;
-	case KEY_PAGE_DOWN:
-		is_page_down_pressed = true;
-		break;
 	default:
-		assert(0);
+		assert(INVALID_KEYCODE);
 		break;
 	}
 }
@@ -130,11 +124,8 @@ void on_event_key_release(int key)
 		is_space_pressed = false;
 		break;
 	case KEY_RETURN:
-	case KEY_ESCAPE:
 	case KEY_UP:
 	case KEY_DOWN:
-	case KEY_PAGE_UP:
-	case KEY_PAGE_DOWN:
 		/* これらのキーはフレームごとに解放されたことにされる */
 		break;
 	default:
@@ -146,8 +137,11 @@ void on_event_key_release(int key)
 /*
  * マウス押下時に呼び出される
  */
-void on_event_mouse_press(int button, UNUSED(int x), UNUSED(int y))
+void on_event_mouse_press(int button, int x, int y)
 {
+	mouse_pos_x = x;
+	mouse_pos_y = y;
+
 	if (button == MOUSE_LEFT)
 		is_left_button_pressed = true;
 	else
@@ -157,9 +151,11 @@ void on_event_mouse_press(int button, UNUSED(int x), UNUSED(int y))
 /*
  * マウス解放時に呼び出される
  */
-void on_event_mouse_release(UNUSED(int button), UNUSED(int x), UNUSED(int y))
+void on_event_mouse_release(UNUSED(int button), int x, int y)
 {
 	/* 1フレーム内の解放を無視する */
+	mouse_pos_x = x;
+	mouse_pos_y = y;
 }
 
 /*
@@ -176,4 +172,5 @@ void on_event_mouse_move(int x, int y)
  */
 void on_event_mouse_scroll(UNUSED(int n))
 {
+	/* FIXME: このイベントはいらないのでは？ */
 }

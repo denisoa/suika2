@@ -48,7 +48,7 @@ static int draw_h;
 static const char *msg;
 
 /* クリックアニメーションの初回描画が完了したか */
-static bool is_click_first;
+static bool done_click_first;
 
 /* クリックアニメーションの表示状態 */
 static bool is_click_visible;
@@ -186,7 +186,7 @@ static bool init(void)
 
 	/* クリックアニメーションを非表示の状態にする */
 	show_click(false);
-	is_click_first = true;
+	done_click_first = true;
 	is_click_visible = false;
 
 	/* スペースキーによる非表示でない状態にする */
@@ -421,7 +421,7 @@ static int get_frame_chars(void)
 		/* 残りの文字をすべて描画する */
 		return total_chars - drawn_chars;
 	}
-	if (is_return_pressed || is_left_button_pressed) {
+	if (is_return_pressed || is_down_pressed || is_left_button_pressed) {
 		/* 残りの文字をすべて描画する */
 		return total_chars - drawn_chars;
 	}
@@ -448,14 +448,15 @@ static void draw_click(void)
 		repeatedly = false;
 		return;
 	}
-	if (!is_click_first && (is_return_pressed || is_left_button_pressed)) {
+	if (!done_click_first &&
+	    (is_return_pressed || is_down_pressed || is_left_button_pressed)) {
 		repeatedly = false;
 		return;
 	}
 
 	/* クリックアニメーションの初回表示のとき */
-	if (is_click_first) {
-		is_click_first = false;
+	if (done_click_first) {
+		done_click_first = false;
 		is_click_visible = false;
 
 		/* 時間計測を開始する */

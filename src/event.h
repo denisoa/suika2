@@ -24,11 +24,8 @@ enum key_code {
 	KEY_CONTROL,
 	KEY_SPACE,
 	KEY_RETURN,
-	KEY_ESCAPE,
 	KEY_UP,
 	KEY_DOWN,
-	KEY_PAGE_UP,
-	KEY_PAGE_DOWN,
 };
 
 /*

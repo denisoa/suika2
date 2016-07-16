@@ -452,8 +452,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd,
 	case WM_SYSKEYDOWN:
 		if(wParam == VK_RETURN && (HIWORD(lParam) & KF_ALTDOWN))
 		{
-			//ToggleFullScreen();
-			ShowWindow(hWnd, SW_MAXIMIZE);
+			ToggleFullScreen();
 			return 0;
 		}
 		break;
@@ -490,10 +489,6 @@ static int ConvertKeyCode(int nVK)
 		return KEY_UP;
 	case VK_DOWN:
 		return KEY_DOWN;
-	case VK_PRIOR:
-		return KEY_PAGE_UP;
-	case VK_NEXT:
-		return KEY_PAGE_DOWN;
 	default:
 		break;
 	}
