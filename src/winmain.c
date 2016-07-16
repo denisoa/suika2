@@ -405,16 +405,20 @@ static LRESULT CALLBACK WndProc(HWND hWnd,
 		PostQuitMessage(0);
 		return 0;
 	case WM_LBUTTONDOWN:
-		on_event_mouse_press(MOUSE_LEFT, LOWORD(lParam), HIWORD(lParam));
+		on_event_mouse_press(MOUSE_LEFT, LOWORD(lParam) - nOffsetX,
+							 HIWORD(lParam) - nOffsetY);
 		return 0;
 	case WM_LBUTTONUP:
-		on_event_mouse_release(MOUSE_LEFT, LOWORD(lParam), HIWORD(lParam));
+		on_event_mouse_release(MOUSE_LEFT, LOWORD(lParam) - nOffsetX,
+							   HIWORD(lParam) - nOffsetY);
 		return 0;
 	case WM_RBUTTONDOWN:
-		on_event_mouse_press(MOUSE_RIGHT, LOWORD(lParam), HIWORD(lParam));
+		on_event_mouse_press(MOUSE_RIGHT, LOWORD(lParam) - nOffsetX,
+							 HIWORD(lParam) - nOffsetY);
 		return 0;
 	case WM_RBUTTONUP:
-		on_event_mouse_release(MOUSE_RIGHT, LOWORD(lParam), HIWORD(lParam));
+		on_event_mouse_release(MOUSE_RIGHT, LOWORD(lParam) - nOffsetX,
+							   HIWORD(lParam) - nOffsetY);
 		return 0;
 	case WM_KEYDOWN:
 		/* オートリピートの場合を除外する */
@@ -435,7 +439,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd,
 			on_event_key_release(kc);
 		return 0;
 	case WM_MOUSEMOVE:
-		on_event_mouse_move(LOWORD(lParam), HIWORD(lParam));
+		on_event_mouse_move(LOWORD(lParam) - nOffsetX,
+							HIWORD(lParam) - nOffsetY);
 		return 0;
 	case WM_MOUSEWHEEL:
 		if((int)(short)HIWORD(wParam) > 0)
