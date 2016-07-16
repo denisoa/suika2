@@ -52,10 +52,20 @@ static HBITMAP hBitmap;
 static struct image *BackImage;
 
 /* 計測用の時刻 */
-DWORD dwStartTime;
+static DWORD dwStartTime;
 
 /* ログファイル */
-FILE *LogFp;
+static FILE *pLogFile;
+
+/* フルスクリーンモードであるか */
+static BOOL bFullScreen;
+
+/* ウィンドウモードでの座標 */
+static RECT rectWindow;
+
+/* フルスクリーンモード時の描画オフセット */
+static int nOffsetX;
+static int nOffsetY;
 
 /* 前方参照 */
 static BOOL InitApp(HINSTANCE hInstance, int nCmdShow);
@@ -70,6 +80,7 @@ static BOOL WaitForNextFrame();
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 								LPARAM lParam);
 static int ConvertKeyCode(int nVK);
+static void ToggleFullScreen(void);
 static void OnPaint(void);
 
 /*
@@ -146,6 +157,10 @@ static BOOL InitApp(HINSTANCE hInstance, int nCmdShow)
 /* 基盤レイヤの終了処理を行う */
 static void CleanupApp(void)
 {
+	/* フルスクリーンモードであれば解除する */
+	if (bFullScreen)
+		ToggleFullScreen();
+
 	/* ウィンドウのデバイスコンテキストを破棄する */
 	if(hWndDC != NULL)
 		ReleaseDC(hWndMain, hWndDC);
@@ -169,17 +184,17 @@ static void CleanupApp(void)
 	cleanup_conf();
 
 	/* ログファイルをクローズする */
-	if(LogFp != NULL)
-		fclose(LogFp);
+	if(pLogFile != NULL)
+		fclose(pLogFile);
 }
 
 /* ログをオープンする */
 static BOOL OpenLogFile(void)
 {
-	if (LogFp == NULL)
+	if (pLogFile == NULL)
 	{
-		LogFp = fopen(LOG_FILE, "w");
-		if (LogFp == NULL)
+		pLogFile = fopen(LOG_FILE, "w");
+		if (pLogFile == NULL)
 		{
 			MessageBox(NULL, "ログファイルをオープンできません。", "エラー",
 					   MB_OK | MB_ICONWARNING);
@@ -223,7 +238,8 @@ static BOOL InitWindow(HINSTANCE hInstance, int nCmdShow)
 		return FALSE;
 
 	/* ウィンドウのスタイルを決める */
-	style = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_OVERLAPPED;
+	style = WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX |
+			WS_OVERLAPPED;
 
 	/* フレームのサイズを取得する */
 	dw = GetSystemMetrics(SM_CXFIXEDFRAME) * 2;
@@ -323,7 +339,7 @@ static void GameLoop(void)
 /* ウィンドウにバックイメージを転送する */
 static void SyncBackImage(int x, int y, int w, int h)
 {
-	BitBlt(hWndDC, x, y, w, h, hBitmapDC, x, y, SRCCOPY);
+	BitBlt(hWndDC, x + nOffsetX, y + nOffsetY, w, h, hBitmapDC, x, y, SRCCOPY);
 }
 
 /* キューにあるイベントを処理する */
@@ -404,6 +420,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd,
 		/* オートリピートの場合を除外する */
 		if((HIWORD(lParam) & 0x4000) != 0)
 			return 0;
+		if(wParam == VK_ESCAPE && bFullScreen)
+		{
+			ToggleFullScreen();
+			return 0;
+		}
 		kc = ConvertKeyCode((int)wParam);
 		if(kc != -1)
 			on_event_key_press(kc);
@@ -417,14 +438,34 @@ static LRESULT CALLBACK WndProc(HWND hWnd,
 		on_event_mouse_move(LOWORD(lParam), HIWORD(lParam));
 		return 0;
 	case WM_MOUSEWHEEL:
-		if((int)(short)HIWORD(wParam) > 0) {
+		if((int)(short)HIWORD(wParam) > 0)
+		{
 			on_event_key_press(KEY_UP);
 			on_event_key_release(KEY_UP);
-		} else if((int)(short)HIWORD(wParam) < 0) {
+		}
+		else if((int)(short)HIWORD(wParam) < 0)
+		{
 			on_event_key_press(KEY_DOWN);
 			on_event_key_release(KEY_DOWN);
 		}
 		return 0;
+	case WM_SYSKEYDOWN:
+		if(wParam == VK_RETURN && (HIWORD(lParam) & KF_ALTDOWN))
+		{
+			//ToggleFullScreen();
+			ShowWindow(hWnd, SW_MAXIMIZE);
+			return 0;
+		}
+		break;
+	case WM_SYSCHAR:
+		return 0;
+	case WM_SYSCOMMAND:
+		if(wParam == SC_MAXIMIZE)
+		{
+			ToggleFullScreen();
+			return TRUE;
+		}
+		break;
 	case WM_PAINT:
 		OnPaint();
 		return 0;
@@ -445,8 +486,6 @@ static int ConvertKeyCode(int nVK)
 		return KEY_SPACE;
 	case VK_RETURN:
 		return KEY_RETURN;
-	case VK_ESCAPE:
-		return KEY_ESCAPE;
 	case VK_UP:
 		return KEY_UP;
 	case VK_DOWN:
@@ -459,6 +498,48 @@ static int ConvertKeyCode(int nVK)
 		break;
 	}
 	return -1;
+}
+
+/* フルスクリーンモードの切り替えを行う */
+static void ToggleFullScreen(void)
+{
+	int cx, cy;
+
+	if(!bFullScreen)
+	{
+		bFullScreen = TRUE;
+		cx = GetSystemMetrics(SM_CXSCREEN);
+		cy = GetSystemMetrics(SM_CYSCREEN);
+		nOffsetX = (cx - conf_window_width) / 2;
+		nOffsetY = (cy - conf_window_height) / 2;
+		GetWindowRect(hWndMain, &rectWindow);
+		SetWindowLong(hWndMain, GWL_STYLE, (LONG)(WS_POPUP | WS_VISIBLE));
+		SetWindowLong(hWndMain, GWL_EXSTYLE, WS_EX_TOPMOST);
+		SetWindowPos(hWndMain, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE |
+					 SWP_NOZORDER | SWP_FRAMECHANGED);
+		MoveWindow(hWndMain, 0, 0, cx, cy, TRUE);
+		ShowWindow(hWndMain, SW_SHOW);
+		InvalidateRect(NULL, NULL, TRUE);
+	}
+	else
+	{
+		bFullScreen = FALSE;
+		nOffsetX = 0;
+		nOffsetY = 0;
+		SetWindowLong(hWndMain, GWL_STYLE, (LONG)(WS_CAPTION |
+												  WS_SYSMENU |
+												  WS_MINIMIZEBOX |
+												  WS_MAXIMIZEBOX |
+												  WS_OVERLAPPED));
+		SetWindowLong(hWndMain, GWL_EXSTYLE, 0);
+		SetWindowPos(hWndMain, NULL, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE |
+					 SWP_NOZORDER | SWP_FRAMECHANGED);
+		MoveWindow(hWndMain, rectWindow.left, rectWindow.top,
+				   rectWindow.right - rectWindow.left,
+				   rectWindow.bottom - rectWindow.top, TRUE);
+		ShowWindow(hWndMain, SW_SHOW);
+		InvalidateRect(NULL, NULL, TRUE);
+	}
 }
 
 /* ウィンドウの内容を更新する */
@@ -474,8 +555,8 @@ static void OnPaint(void)
 		   ps.rcPaint.right - ps.rcPaint.left,
 		   ps.rcPaint.bottom - ps.rcPaint.top,
 		   hBitmapDC,
-		   ps.rcPaint.left,
-		   ps.rcPaint.top,
+		   ps.rcPaint.left - nOffsetX,
+		   ps.rcPaint.top - nOffsetY,
 		   SRCCOPY);
 	EndPaint(hWndMain, &ps);
 }
@@ -493,16 +574,16 @@ bool log_info(const char *s, ...)
 	va_list ap;
 
 	va_start(ap, s);
-	if(LogFp != NULL)
+	if(pLogFile != NULL)
 	{
 		/* メッセージボックスを表示する */
 		vsnprintf(buf, sizeof(buf), s, ap);
 		MessageBox(hWndMain, buf, "情報", MB_OK | MB_ICONINFORMATION);
 
 		/* ファイルへ出力する */
-		fprintf(LogFp, buf);
-		fflush(LogFp);
-		if(ferror(LogFp))
+		fprintf(pLogFile, buf);
+		fflush(pLogFile);
+		if(ferror(pLogFile))
 			return false;
 	}
 	va_end(ap);
@@ -518,16 +599,16 @@ bool log_warn(const char *s, ...)
 	va_list ap;
 
 	va_start(ap, s);
-	if(LogFp != NULL)
+	if(pLogFile != NULL)
 	{
 		/* メッセージボックスを表示する */
 		vsnprintf(buf, sizeof(buf), s, ap);
 		MessageBox(hWndMain, buf, "警告", MB_OK | MB_ICONWARNING);
 
 		/* ファイルへ出力する */
-		fprintf(LogFp, buf);
-		fflush(LogFp);
-		if(ferror(LogFp))
+		fprintf(pLogFile, buf);
+		fflush(pLogFile);
+		if(ferror(pLogFile))
 			return false;
 	}
 	va_end(ap);
@@ -543,16 +624,16 @@ bool log_error(const char *s, ...)
 	va_list ap;
 
 	va_start(ap, s);
-	if(LogFp != NULL)
+	if(pLogFile != NULL)
 	{
 		/* メッセージボックスを表示する */
 		vsnprintf(buf, sizeof(buf), s, ap);
 		MessageBox(hWndMain, buf, "エラー", MB_OK | MB_ICONERROR);
 
 		/* ファイルへ出力する */
-		fprintf(LogFp, buf);
-		fflush(LogFp);
-		if(ferror(LogFp))
+		fprintf(pLogFile, buf);
+		fflush(pLogFile);
+		if(ferror(pLogFile))
 			return false;
 	}
 	va_end(ap);
