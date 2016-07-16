@@ -633,8 +633,6 @@ static int get_key_code(XEvent *event)
 	switch (keysym) {
 	case XK_Return:
 		return KEY_RETURN;
-	case XK_Escape:
-		return KEY_ESCAPE;
 	case XK_space:
 		return KEY_SPACE;
 		break;
@@ -645,10 +643,6 @@ static int get_key_code(XEvent *event)
 		return KEY_DOWN;
 	case XK_Up:
 		return KEY_UP;
-	case XK_Page_Down:
-		return KEY_PAGE_DOWN;
-	case XK_Page_Up:
-		return KEY_PAGE_UP;
 	}
 	return -1;
 }
