@@ -5,6 +5,9 @@ install:
 	cp package-mac ../suika2/tool/
 	cp package-win.exe ../suika2/tool/
 
+package-linux32: package.c
+	gcc -O2 -o package-linux32 package.c
+
 package-linux64: package.c
 	gcc -O2 -o package-linux64 package.c
 
