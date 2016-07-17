@@ -17,7 +17,7 @@ CPPFLAGS = \
 #
 
 CFLAGS = \
-	-O0 -g3 \
+	-O3 \
 	-ftree-vectorize \
 	-fopt-info-vec \
 	-std=gnu89 \
@@ -83,6 +83,9 @@ include ../sse.mk
 
 run: suika
 	cp suika ../../suika2; cd ../../suika2; ./suika
+
+install: suika
+	cp suika ../../suika2/suika-linux64
 
 clean:
 	rm -rf *~ *.o suika

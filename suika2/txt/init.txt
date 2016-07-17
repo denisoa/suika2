@@ -8,10 +8,39 @@
 @ch c none 1.0
 
 ###
+### メニュー
+###
+
+@vol bgm 1.0
+@bgm 01.ogg
+@bg menu.png 1.0
+
+:MENU
+@menu menu.png menu_selected.png START 945 339 300 90 LOAD 990 462 260 80 QUIT 1004 569 244 91
+
+:START
+@se click.ogg
+@goto SCENE1
+
+:LOAD
+@se click.ogg
+@goto $LOAD
+@goto MENU
+
+:QUIT
+@se click.ogg
+@goto END
+
+###
 ### シーン1 (セリフとモノローグの交錯)
 ###
 
+:SCENE1
+
+@vol bgm 0.0 1.0
+@bg white.png 1.0
 @bgm cicada.ogg
+@vol bgm 1.0 1.0
 @bg roof.png 1.0
 @ch c 001-fun.png 1.0
 *？？？*001.ogg*あー、気持ちいい風……。
@@ -53,39 +82,12 @@
 *みどり*010.ogg*君に……Suika 2のことを知ってもらうためだよ！
 
 ###
-### メニュー
-###
-
-@vol bgm 1.0
-@bgm 01.ogg
-@bg menu.png 1.0
-
-:MENU
-@menu menu.png menu_selected.png START 945 339 300 90 LOAD 990 462 260 80 QUIT 1004 569 244 91
-
-:START
-@se click.ogg
-@goto SCENE1
-
-:LOAD
-@se click.ogg
-@goto $LOAD
-@goto MENU
-
-:QUIT
-@se click.ogg
-@goto END
-
-###
 ### シーン2 (屋上であいさつする)
 ###
 
-:SCENE1
-
-@vol bgm 0.0 1.0
+@bgm 02.ogg
+@vol bgm 1.0 1.0
 @bg roof.png 1.0
-@vol bgm 1.0 0.0
-@bgm cicada.ogg
 @ch c 001-happy.png 1.0
 *みどり*011.ogg*こんにちは！Suika 2を使ってくれてありがと！
 *みどり*012.ogg*知ってると思うけど、Suika 2は、アドベンチャーゲーム制作ツールだよ。

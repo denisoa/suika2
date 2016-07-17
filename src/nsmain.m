@@ -314,16 +314,10 @@ BOOL isControlPressed;
             return KEY_SPACE;
         case KC_RETURN:
             return KEY_RETURN;
-        case KC_ESCAPE:
-            return KEY_ESCAPE;
         case KC_UP:
             return KEY_UP;
         case KC_DOWN:
             return KEY_DOWN;
-        case KC_PAGE_UP:
-            return KEY_PAGE_UP;
-        case KC_PAGE_DOWN:
-            return KEY_PAGE_DOWN;
     }
     return -1;
 }

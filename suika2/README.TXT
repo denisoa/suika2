@@ -1,4 +1,4 @@
-Suika 2.0.0-preview13
+Suika 2.0.0-preview14
 =====================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
@@ -32,6 +32,7 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * 不要になりましたらフォルダごと削除してください
 
 * Credit
+    * サンプルゲーム制作進行 80
     * 音楽 80 Copyright (C) 2016 80. All rights reserved.
     * 音楽 krol様
     * CV しぐれるぅ。様
@@ -40,6 +41,10 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * MITライセンスです(COPYINGをご覧ください)
 
 * ChangeLog
+    * Suika 2.0.0-preview14 2016/07/17
+        * Windowsで全画面モードに対応
+        * Windowsでのアーカイブ作成のバグを修正
+        * マウスホイールダウンでメッセージを進めるように変更
     * Suika 2.0.0-preview13 2016/07/15
         * アーカイブ機能を追加、これにて2.0.0必須機能の追加を終了
     * Suika 2.0.0-preview12 2016/07/14
