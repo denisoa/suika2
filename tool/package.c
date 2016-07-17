@@ -17,6 +17,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dirent.h>
+#endif
+
 /* ファイルエントリの最大数 */
 #define ENTRY_SIZE		(10000)
 
@@ -43,13 +49,13 @@ const char *dir_names[] = {
 /* ファイルエントリ */
 struct entry {
 	/* ファイル名 */
-	char file_name[FILE_NAME_SIZE];
+	char name[FILE_NAME_SIZE];
 
 	/* ファイルサイズ */
-	uint64_t file_size;
+	uint64_t size;
 
 	/* ファイルのアーカイブ内でのオフセット */
-	uint64_t file_offset;
+	uint64_t offset;
 } entry[ENTRY_SIZE];
 
 /* ファイル数 */
@@ -63,9 +69,6 @@ bool write_file_entries(FILE *fp);
 bool write_file_bodies(FILE *fp);
 
 #ifdef _WIN32
-
-#include <windows.h>
-
 /*
  * ディレクトリのファイル一覧を取得する(Windows版)
  */
@@ -75,34 +78,29 @@ bool get_file_names(const char *dir)
     HANDLE hFind;
     WIN32_FIND_DATA wfd;
 
+    /* ディレクトリの内容を取得する */
     snprintf(path, sizeof(path), "%s\\*.*", dir);
-
     hFind = FindFirstFile(path, &wfd);
     if(hFind == INVALID_HANDLE_VALUE)
     {
         printf("Directory %s not found.\n", dir);
         return false;
     }
-
     do
     {
         if(!(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY))
         {
-            snprintf(entry[file_count].file_name, FILE_NAME_SIZE,
+            snprintf(entry[file_count].name, FILE_NAME_SIZE,
                      "%s/%s", dir, wfd.cFileName);
-            printf("  %s\n", entry[file_count].file_name);
+            printf("  %s\n", entry[file_count].name);
             file_count++;
 	}
-    } while(FindNextFile(hFind, &wfd));
+    } while (FindNextFile(hFind, &wfd));
 
     FindClose(hFind);
     return true;
 }
-
 #else
-
-#include <dirent.h>
-
 /*
  * ディレクトリのファイル一覧を取得する(UNIX版)
  */
@@ -126,20 +124,16 @@ bool get_file_names(const char *dir)
 		if (names[i]->d_name[0] == '.')
 			continue;
 
-		snprintf(entry[file_count].file_name, FILE_NAME_SIZE,
+		snprintf(entry[file_count].name, FILE_NAME_SIZE,
 			 "%s/%s", dir, names[i]->d_name);
 
-		printf("  %s\n", entry[file_count].file_name);
+		printf("  %s\n", entry[file_count].name);
 		free(names[i]);
 		file_count++;
 	}
 	free(names);
-
-	/* オフセットの値を計算する */
-	offset = FILE_COUNT_BYTES + ENTRY_BYTES * file_count;
 	return true;
 }
-
 #endif
 
 /*
@@ -151,26 +145,27 @@ bool get_file_sizes(void)
 	FILE *fp;
 
 	/* 各ファイルのサイズを求め、オフセットを計算する */
+	offset = FILE_COUNT_BYTES + ENTRY_BYTES * file_count;
 	for (i = 0; i < file_count; i++) {
 #ifdef _WIN32
-		char *path = strdup(entry[i].file_name);
+		char *path = strdup(entry[i].name);
 		*strchr(path, '/') = '\\';
 		fp = fopen(path, "rb");
 #else
-		fp = fopen(entry[i].file_name, "r");
+		fp = fopen(entry[i].name, "r");
 #endif
 		if (fp == NULL) {
-			printf("Can't open file %s\n", entry[i].file_name);
+			printf("Can't open file %s\n", entry[i].name);
 			return false;
 		}
 		fseek(fp, 0, SEEK_END);
-		entry[i].file_size = ftell(fp);
-		entry[i].file_offset = offset;
+		entry[i].size = ftell(fp);
+		entry[i].offset = offset;
 		fclose(fp);
 #ifdef _WIN32
 		free(path);
 #endif
-		offset += entry[i].file_size;
+		offset += entry[i].size;
 	}
 	return true;
 }
@@ -206,11 +201,11 @@ bool write_file_entries(FILE *fp)
 	uint64_t i;
 
 	for (i = 0; i < file_count; i++) {
-		if (fwrite(&entry[i].file_name, FILE_NAME_SIZE, 1, fp) < 1)
+		if (fwrite(&entry[i].name, FILE_NAME_SIZE, 1, fp) < 1)
 			return false;
-		if (fwrite(&entry[i].file_size, sizeof(uint64_t), 1, fp) < 1)
+		if (fwrite(&entry[i].size, sizeof(uint64_t), 1, fp) < 1)
 			return false;
-		if (fwrite(&entry[i].file_offset, sizeof(uint64_t), 1, fp) < 1)
+		if (fwrite(&entry[i].offset, sizeof(uint64_t), 1, fp) < 1)
 			return false;
 	}
 	return true;
@@ -226,17 +221,16 @@ bool write_file_bodies(FILE *fp)
 
 	for (i = 0; i < file_count; i++) {
 #ifdef _WIN32
-		char *path = strdup(entry[i].file_name);
+		char *path = strdup(entry[i].name);
 		*strchr(path, '/') = '\\';
 		fpin = fopen(path, "rb");
 #else
-		fpin = fopen(entry[i].file_name, "r");
+		fpin = fopen(entry[i].name, "rb");
 #endif
 		if (fpin == NULL) {
-			printf("Can't open %s\n", entry[i].file_name);
+			printf("Can't open %s\n", entry[i].name);
 			return false;
 		}
-
 		do  {
 			len = fread(buf, 1, sizeof(buf), fpin);
 			if (len > 0)
