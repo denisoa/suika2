@@ -1,4 +1,4 @@
-Suika 2.0.0-preview14
+Suika 2.0.0-preview15
 =====================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
@@ -14,13 +14,13 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * Windows 10 32bit
 
 * Mac動作確認リスト
-    * Mac OS X Snow Leopard 10.6.8
+    * Mac OS X Snow Leopard 10.6.8 (フルスクリーンモードはサポートせず)
     * Mac OS X Lion 10.7.5
     * OS X Mavericks 10.9.5
     * OS X El Capitan 10.11.5
 
 * Linux動作確認リスト
-    * Ubuntu 16.04 64bit
+    * Ubuntu 16.04 64bit (フルスクリーンモードはサポートせず)
 
 * Contact
     * 公式WEB http://luxion.jp/s2/
@@ -41,8 +41,10 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * MITライセンスです(COPYINGをご覧ください)
 
 * ChangeLog
+    * Suika 2.0.0-preview15 2016/07/18
+        * Macでのフルスクリーンモードに対応(Mac OS X 10.7以降)
     * Suika 2.0.0-preview14 2016/07/17
-        * Windowsで全画面モードに対応
+        * Windowsでのフルスクリーンモードに対応
         * Windowsでのアーカイブ作成のバグを修正
         * マウスホイールダウンでメッセージを進めるように変更
     * Suika 2.0.0-preview13 2016/07/15
