@@ -80,6 +80,9 @@ static void closeLog(void);
 // コントロールキーの状態
 BOOL isControlPressed;
 
+// Full Screen Mode
+BOOL isFullScreenMode;
+
 // アプリケーションの初期化処理を行う
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
     UNUSED_PARAMETER(notification);
@@ -322,6 +325,18 @@ BOOL isControlPressed;
     return -1;
 }
 
+- (NSSize)window:(NSWindow *)window
+willUseFullScreenContentSize:(NSSize)proposedSize {
+    UNUSED_PARAMETER(window);
+    UNUSED_PARAMETER(proposedSize);
+
+    NSSize modSize;
+    modSize.width = conf_window_width;
+    modSize.height = conf_window_height;
+
+    return modSize;
+}
+
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)app {
     UNUSED_PARAMETER(app);
     return YES;
@@ -391,6 +406,9 @@ int main()
                                          NSMiniaturizableWindowMask
                                  backing:NSBackingStoreBuffered
                                    defer:NO];
+    [theWindow setCollectionBehavior:
+                   [theWindow collectionBehavior] |
+                   NSWindowCollectionBehaviorFullScreenPrimary];
     [theWindow cascadeTopLeftFromPoint:NSMakePoint(20,20)];
     [theWindow setTitle:[[NSString alloc]
      initWithUTF8String:conf_window_title]];
@@ -438,7 +456,6 @@ int main()
     [pool release];
 #else
     (void)timer;
-
     }
 #endif
 
