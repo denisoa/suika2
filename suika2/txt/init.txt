@@ -87,7 +87,6 @@
 
 @bgm 02.ogg
 @vol bgm 1.0 1.0
-@bg roof.png 1.0
 @ch c 001-happy.png 1.0
 *みどり*011.ogg*こんにちは！Suika 2を使ってくれてありがと！
 *みどり*012.ogg*知ってると思うけど、Suika 2は、アドベンチャーゲーム制作ツールだよ。

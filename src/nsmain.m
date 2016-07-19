@@ -35,11 +35,6 @@ enum {
 };
 
 //
-// 初期化済みであるか
-//
-static bool isInitialized;
-
-//
 // 背景イメージ
 //
 static struct image *backImage;
@@ -48,6 +43,11 @@ static struct image *backImage;
 // 背景イメージのピクセル
 //
 static unsigned char *backImagePixels;
+
+//
+// コントロールキーの状態
+//
+static BOOL isControlPressed;
 
 //
 // ログファイル
@@ -69,24 +69,120 @@ SuikaView *theView;
 //
 // 前方参照
 //
+static BOOL initWindow(void);
+static BOOL initBackImage(void);
 static BOOL openLog(void);
 static void closeLog(void);
 
 //
-// ビューの実装
+// メイン
 //
-@implementation SuikaView
+int main()
+{
+#ifdef SSE_VERSIONING
+	// ベクトル命令の対応を確認する
+    x86_check_cpuid_flags();
+#endif
 
-// コントロールキーの状態
-BOOL isControlPressed;
+#if !__has_feature(objc_arc)
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+#else
+    @autoreleasepool {
+#endif
 
-// Full Screen Mode
-BOOL isFullScreenMode;
+    // ログをオープンする
+    if (openLog()) {
+        // パッケージの初期化処理を行う
+        if (init_file()) {
+            // コンフィグの初期化処理を行う
+            if (init_conf()) {
+                // オーディオユニットの初期化処理を行う
+                if(init_aunit()) {
+                    // 背景イメージの作成を行う
+                    if(initBackImage()) {
+                        // アプリケーション本体の初期化を行う
+                        if(on_event_init()) {
+                            // ウィンドウを作成する
+                            if(initWindow()) {
+                                // メインループを実行する
+                                [NSApp activateIgnoringOtherApps:YES];
+                                [NSApp run];
 
-// アプリケーションの初期化処理を行う
-- (void)applicationDidFinishLaunching:(NSNotification *)notification {
-    UNUSED_PARAMETER(notification);
+                                // アプリケーション本体の終了処理を行う
+                                on_event_cleanup();
+                            }
 
+                            // TODO: How to destroy theView?
+                            [theWindow close];
+                        }
+
+                        // 背景イメージの破棄を行う
+                        destroy_image(backImage);
+                    }
+
+                    // オーディオユニットの終了処理を行う
+                    cleanup_aunit();
+                }
+
+                // コンフィグの終了処理を行う
+                cleanup_conf();
+            }
+
+            // パッケージの終了処理を行う
+            cleanup_file();
+        }
+        
+        // ログをクローズする
+        closeLog();
+    }
+
+#if !__has_feature(objc_arc)
+    [pool release];
+#else
+    (void)timer;
+    }
+#endif
+
+	return 0;
+}
+
+// ログをオープンする
+static BOOL openLog(void)
+{
+    // .appバンドルのあるパスを取得する
+    NSString *base = [[[NSBundle mainBundle] bundlePath]
+                         stringByDeletingLastPathComponent];
+
+    // ログのパスを生成する
+    const char *path = [[NSString stringWithFormat:@"%@/%s", base,
+                                  LOG_FILE] UTF8String];
+
+    // ログをオープンする
+    logFp = fopen(path, "w");
+    if(logFp == NULL) {
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"エラー"];
+        [alert setInformativeText:@"Cannot open log file."];
+        [alert runModal];
+#if !__has_feature(objc_arc)
+        [alert autorelease];
+#endif
+        return NO;
+    }
+    return YES;
+}
+
+// ログをクローズする
+static void closeLog(void)
+{
+    // ログをクローズする
+    if(logFp != NULL)
+        fclose(logFp);
+}
+
+// イメージの作成を行う
+static BOOL initBackImage(void)
+{
 #ifndef SSE_VERSIONING
     backImagePixels = malloc(conf_window_width * conf_window_height * 4);
     if (pixels == NULL) {
@@ -97,8 +193,7 @@ BOOL isFullScreenMode;
     if (posix_memalign((void **)&backImagePixels, SSE_ALIGN,
                        (size_t)(conf_window_width * conf_window_height * 4))
         != 0) {
-        [NSApp terminate:nil];
-        return;
+        return NO;
     }
 #endif
 
@@ -107,31 +202,250 @@ BOOL isFullScreenMode;
 	if(conf_window_white)
 		clear_image_white(backImage);
 
-    if(!init_aunit()) {
-        [NSApp terminate:nil];
-        return;
-    }
-    if(!on_event_init()) {
-        [NSApp terminate:nil];
-        return;
-    }
-    isInitialized = true;
+    return YES;
 }
 
-- (void)applicationWillTerminate:(NSNotification *)notification {
-    UNUSED_PARAMETER(notification);
+// ウィンドウの初期化処理を行う
+static BOOL initWindow(void)
+{
+    // アプリケーションの初期化処理を行う
+    [NSApplication sharedApplication];
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+
+    // メニューバーを作成する
+    NSMenu *menuBar = [NSMenu new];
+    NSMenuItem *appMenuItem = [NSMenuItem new];
+    [menuBar addItem:appMenuItem];
+    [NSApp setMainMenu:menuBar];
+
+    // アプリケーションのメニューを作成する
+    id appMenu = [NSMenu new];
+    id quitMenuItem = [[NSMenuItem alloc]
+                          initWithTitle:[NSString stringWithFormat:@"%@ %s",
+                                                  @"Quit", conf_window_title]
+                                 action:@selector(terminate:)
+                          keyEquivalent:@"q"];
+    [appMenu addItem:quitMenuItem];
+    [appMenuItem setSubmenu:appMenu];
+
+    // ウィンドウを作成する
+    theWindow = [[NSWindow alloc]
+                     initWithContentRect:NSMakeRect(0, 0,
+                                                    conf_window_width,
+                                                    conf_window_height)
+                               styleMask:NSTitledWindowMask |
+                                         NSClosableWindowMask |
+                                         NSMiniaturizableWindowMask
+                                 backing:NSBackingStoreBuffered
+                                   defer:NO];
+    [theWindow setCollectionBehavior:
+                   [theWindow collectionBehavior] |
+                   NSWindowCollectionBehaviorFullScreenPrimary];
+    [theWindow cascadeTopLeftFromPoint:NSMakePoint(20,20)];
+    [theWindow setTitle:[[NSString alloc]
+     initWithUTF8String:conf_window_title]];
+    [theWindow makeKeyAndOrderFront:nil];
+    [theWindow setAcceptsMouseMovedEvents:YES];
+
+    // ビューを作成する
+    theView = [[SuikaView alloc] init];
+    [theWindow setContentView:theView];
+    [theWindow makeFirstResponder:theView];
+
+    // デリゲートを設定する
+    [NSApp setDelegate:theView];
+    [theWindow setDelegate:theView];
+
+    // タイマをセットする
+    NSTimer *timer = [NSTimer
+                         scheduledTimerWithTimeInterval:1.0/30.0
+                                                 target:theView
+                                               selector:@selector(timerFired:)
+                                               userInfo:nil
+                                                repeats:YES];
+
+    // Hack: コマンドラインから起動された際にメニューを有効にする
+    ProcessSerialNumber psn = {0, kCurrentProcess};
+    TransformProcessType(&psn, kProcessTransformToForegroundApplication);
+
+#if !__has_feature(objc_arc)
+    [menuBar autorelease];
+    [appMenuItem autorelease];
+    [appMenu autorelease];
+    [appMenuItem autorelease];
+    [theWindow autorelease];
+    [theView autorelease];
+    [timer autorelease];
+#endif
+
+    return YES;
+}
+
+//
+// platform.hの実装
+//
+
+//
+// データファイルのディレクトリ名とファイル名を指定して有効なパスを取得する
+//
+char *make_valid_path(const char *dir, const char *fname)
+{
+    char *ret;
+
+#if !__has_feature(objc_arc)
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+#else
+    @autoreleasepool {
+#endif
+
+    NSString *base = [[[NSBundle mainBundle] bundlePath]
+                         stringByDeletingLastPathComponent];
+
+    NSString *path;
+    if (dir != NULL)
+        path = [NSString stringWithFormat:@"%@/%s/%s", base, dir, fname];
+    else
+        path = [NSString stringWithFormat:@"%@/%s", base, fname];
+
+    const char *cstr = [path UTF8String];
+    ret = strdup(cstr);
+
+#if !__has_feature(objc_arc)
+    [pool release];
+#else
+    }
+#endif
+
+    if(ret == NULL) {
+        log_memory();
+        return NULL;
+    }
+    return ret;
+}
+
+//
+// INFOログを出力する
+//
+bool log_info(const char *s, ...)
+{
+	char buf[1024];
+    va_list ap;
     
-    on_event_cleanup();
-    cleanup_aunit();
-    destroy_image(backImage);
+    va_start(ap, s);
+    vsnprintf(buf, sizeof(buf), s, ap);
+    va_end(ap);
+
+    // ログファイルに出力する
+    if (logFp != NULL) {
+        fprintf(stderr, "%s", buf);
+        fprintf(logFp, "%s", buf);
+        fflush(logFp);
+        if (ferror(logFp))
+            return false;
+    }
+    return true;
 }
 
+//
+// WARNログを出力する
+//
+bool log_warn(const char *s, ...)
+{
+	char buf[1024];
+    va_list ap;
+
+    va_start(ap, s);
+    vsnprintf(buf, sizeof(buf), s, ap);
+    va_end(ap);
+
+    // ログファイルに出力する
+    if (logFp != NULL) {
+        fprintf(stderr, "%s", buf);
+        fprintf(logFp, "%s", buf);
+        fflush(logFp);
+        if (ferror(logFp))
+            return false;
+    }
+    return true;
+}
+
+//
+// Errorログを出力する
+//
+bool log_error(const char *s, ...)
+{
+	char buf[1024];
+    va_list ap;
+
+    va_start(ap, s);
+    vsnprintf(buf, sizeof(buf), s, ap);
+    va_end(ap);
+
+    // アラートを表示する
+    NSAlert *alert = [[NSAlert alloc] init];
+    [alert setMessageText:@"エラー"];
+    [alert setInformativeText:[[NSString alloc] initWithUTF8String:buf]];
+    [alert runModal];
+
+    // ログファイルに出力する
+    if (logFp != NULL) {
+        fprintf(stderr, "%s", buf);
+        fprintf(logFp, "%s", buf);
+        fflush(logFp);
+        if (ferror(logFp))
+            return false;
+    }
+    return true;
+}
+
+//
+// バックイメージを取得する
+//
+struct image *get_back_image(void)
+{
+    return backImage;
+}
+
+//
+// タイマをリセットする
+//
+void reset_stop_watch(stop_watch_t *t)
+{
+    struct timeval tv;
+    
+    gettimeofday(&tv, NULL);
+    
+    *t = (stop_watch_t)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
+}
+
+//
+// タイマのラップをミリ秒単位で取得する
+//
+int get_stop_watch_lap(stop_watch_t *t)
+{
+    struct timeval tv;
+    stop_watch_t end;
+        
+    gettimeofday(&tv, NULL);
+        
+    end = (stop_watch_t)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
+        
+    if (end < *t) {
+        reset_stop_watch(t);
+            return 0;
+    }
+        
+    return (int)(end - *t);
+}
+
+//
+// ビューの実装
+//
+@implementation SuikaView
+
+// タイマコールバック
 - (void)timerFired:(NSTimer *)timer {
     UNUSED_PARAMETER(timer);
-    
-    // 未初期化の場合
-    if (!isInitialized)
-        return;
     
 #if !__has_feature(objc_arc)
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -161,12 +475,6 @@ BOOL isFullScreenMode;
 }
 
 - (void)drawRect:(NSRect)rect {
-    // 未初期化の場合
-    if (!isInitialized) {
-        [super drawRect:rect];
-        return;
-    }
-    
     // 描画範囲がない場合
     if (rect.size.width == 0 || rect.size.height == 0)
         return;
@@ -337,6 +645,23 @@ willUseFullScreenContentSize:(NSSize)proposedSize {
     return modSize;
 }
 
+- (BOOL)windowShouldClose:(id)sender {
+    UNUSED_PARAMETER(sender);
+
+    NSAlert *alert = [[NSAlert alloc] init];
+#if !__has_feature(objc_arc)
+    [alert autorelease];
+#endif
+    [alert addButtonWithTitle:@"はい"];
+    [alert addButtonWithTitle:@"いいえ"];
+    [alert setMessageText:@"終了しますか？"];
+    [alert setAlertStyle:NSWarningAlertStyle];
+    if([alert runModal] == NSAlertFirstButtonReturn)
+        return YES;
+    else
+        return NO;
+}
+
 - (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)app {
     UNUSED_PARAMETER(app);
     return YES;
@@ -347,308 +672,3 @@ willUseFullScreenContentSize:(NSSize)proposedSize {
 }
 
 @end
-
-//
-// メイン
-//
-int main()
-{
-#ifdef SSE_VERSIONING
-	// ベクトル命令の対応を確認する
-    x86_check_cpuid_flags();
-#endif
-
-#if !__has_feature(objc_arc)
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-#else
-    @autoreleasepool {
-#endif
-
-    // ログをオープンする
-    if (!openLog())
-        return 1;
-
-    // パッケージの初期化処理を行う
-    if (!init_file())
-        return 1;
-
-    // コンフィグの初期化処理を行う
-    if (!init_conf())
-        return 1;
-
-    // アプリケーションの初期化処理を行う
-    [NSApplication sharedApplication];
-    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
-
-    // メニューバーを作成する
-    id menuBar = [NSMenu new];
-    id appMenuItem = [NSMenuItem new];
-    [menuBar addItem:appMenuItem];
-    [NSApp setMainMenu:menuBar];
-
-    // アプリケーションのメニューを作成する
-    id appMenu = [NSMenu new];
-    id quitMenuItem = [[NSMenuItem alloc]
-                          initWithTitle:[NSString stringWithFormat:@"%@ %s",
-                                                  @"Quit", conf_window_title]
-                                 action:@selector(terminate:)
-                          keyEquivalent:@"q"];
-    [appMenu addItem:quitMenuItem];
-    [appMenuItem setSubmenu:appMenu];
-
-    // ウィンドウを作成する
-    theWindow = [[NSWindow alloc]
-                     initWithContentRect:NSMakeRect(0, 0,
-                                                    conf_window_width,
-                                                    conf_window_height)
-                               styleMask:NSTitledWindowMask |
-                                         NSClosableWindowMask |
-                                         NSMiniaturizableWindowMask
-                                 backing:NSBackingStoreBuffered
-                                   defer:NO];
-    [theWindow setCollectionBehavior:
-                   [theWindow collectionBehavior] |
-                   NSWindowCollectionBehaviorFullScreenPrimary];
-    [theWindow cascadeTopLeftFromPoint:NSMakePoint(20,20)];
-    [theWindow setTitle:[[NSString alloc]
-     initWithUTF8String:conf_window_title]];
-    [theWindow makeKeyAndOrderFront:nil];
-    [theWindow setAcceptsMouseMovedEvents:YES];
-
-    // ビューを作成する
-    theView = [[SuikaView alloc] init];
-    [theWindow setContentView:theView];
-    [theWindow makeFirstResponder:theView];
-
-    // デリゲートを設定する
-    [NSApp setDelegate:theView];
-    [theWindow setDelegate:theView];
-
-    // タイマをセットする
-    id timer = [NSTimer scheduledTimerWithTimeInterval:1.0/30.0
-                                                target:theView
-                                              selector:@selector(timerFired:)
-                                              userInfo:nil
-                                               repeats:YES];
-
-    // Hack: コマンドラインから起動された際にメニューを有効にする
-    ProcessSerialNumber psn = {0, kCurrentProcess};
-    TransformProcessType(&psn, kProcessTransformToForegroundApplication);
-
-    // メインループを実行する
-    [NSApp activateIgnoringOtherApps:YES];
-    [NSApp run];
-
-    // コンフィグの終了処理を行う
-    cleanup_conf();
-        
-    // ログをクローズする
-    closeLog();
-
-#if !__has_feature(objc_arc)
-    [menuBar autorelease];
-    [appMenuItem autorelease];
-    [appMenu autorelease];
-    [appMenuItem autorelease];
-    [theWindow autorelease];
-    [theView autorelease];
-    [timer autorelease];
-    [pool release];
-#else
-    (void)timer;
-    }
-#endif
-
-	return 0;
-}
-
-// ログをオープンする
-static BOOL openLog(void)
-{
-    // .appバンドルのあるパスを取得する
-    NSString *base = [[[NSBundle mainBundle] bundlePath]
-                         stringByDeletingLastPathComponent];
-
-    // ログのパスを生成する
-    const char *path = [[NSString stringWithFormat:@"%@/%s", base,
-                                  LOG_FILE] UTF8String];
-
-    // ログをオープンする
-    logFp = fopen(path, "w");
-    if(logFp == NULL) {
-        NSAlert *alert = [[NSAlert alloc] init];
-        [alert setMessageText:@"エラー"];
-        [alert setInformativeText:@"Cannot open log file."];
-        [alert runModal];
-#if !__has_feature(objc_arc)
-        [alert autorelease];
-#endif
-        return NO;
-    }
-    return YES;
-}
-
-// ログをクローズする
-static void closeLog(void)
-{
-    // ログをクローズする
-    if(logFp != NULL)
-        fclose(logFp);
-}
-
-//
-// platform.hの実装
-//
-
-//
-// データファイルのディレクトリ名とファイル名を指定して有効なパスを取得する
-//
-char *make_valid_path(const char *dir, const char *fname)
-{
-    char *ret;
-
-#if !__has_feature(objc_arc)
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-#else
-    @autoreleasepool {
-#endif
-
-    NSString *base = [[[NSBundle mainBundle] bundlePath]
-                         stringByDeletingLastPathComponent];
-
-    NSString *path;
-    if (dir != NULL)
-        path = [NSString stringWithFormat:@"%@/%s/%s", base, dir, fname];
-    else
-        path = [NSString stringWithFormat:@"%@/%s", base, fname];
-
-    const char *cstr = [path UTF8String];
-    ret = strdup(cstr);
-
-#if !__has_feature(objc_arc)
-    [pool release];
-#else
-    }
-#endif
-
-    if(ret == NULL) {
-        log_memory();
-        return NULL;
-    }
-    return ret;
-}
-
-//
-// INFOログを出力する
-//
-bool log_info(const char *s, ...)
-{
-	char buf[1024];
-    va_list ap;
-    
-    va_start(ap, s);
-    vsnprintf(buf, sizeof(buf), s, ap);
-    va_end(ap);
-
-    // ログファイルに出力する
-    if (logFp != NULL) {
-        fprintf(stderr, "%s", buf);
-        fprintf(logFp, "%s", buf);
-        fflush(logFp);
-        if (ferror(logFp))
-            return false;
-    }
-    return true;
-}
-
-//
-// WARNログを出力する
-//
-bool log_warn(const char *s, ...)
-{
-	char buf[1024];
-    va_list ap;
-
-    va_start(ap, s);
-    vsnprintf(buf, sizeof(buf), s, ap);
-    va_end(ap);
-
-    // ログファイルに出力する
-    if (logFp != NULL) {
-        fprintf(stderr, "%s", buf);
-        fprintf(logFp, "%s", buf);
-        fflush(logFp);
-        if (ferror(logFp))
-            return false;
-    }
-    return true;
-}
-
-//
-// Errorログを出力する
-//
-bool log_error(const char *s, ...)
-{
-	char buf[1024];
-    va_list ap;
-
-    va_start(ap, s);
-    vsnprintf(buf, sizeof(buf), s, ap);
-    va_end(ap);
-
-    // アラートを表示する
-    NSAlert *alert = [[NSAlert alloc] init];
-    [alert setMessageText:@"エラー"];
-    [alert setInformativeText:[[NSString alloc] initWithUTF8String:buf]];
-    [alert runModal];
-
-    // ログファイルに出力する
-    if (logFp != NULL) {
-        fprintf(stderr, "%s", buf);
-        fprintf(logFp, "%s", buf);
-        fflush(logFp);
-        if (ferror(logFp))
-            return false;
-    }
-    return true;
-}
-
-//
-// バックイメージを取得する
-//
-struct image *get_back_image(void)
-{
-    return backImage;
-}
-
-//
-// タイマをリセットする
-//
-void reset_stop_watch(stop_watch_t *t)
-{
-    struct timeval tv;
-    
-    gettimeofday(&tv, NULL);
-    
-    *t = (stop_watch_t)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
-}
-
-//
-// タイマのラップをミリ秒単位で取得する
-//
-int get_stop_watch_lap(stop_watch_t *t)
-{
-    struct timeval tv;
-    stop_watch_t end;
-        
-    gettimeofday(&tv, NULL);
-        
-    end = (stop_watch_t)(tv.tv_sec * 1000 + tv.tv_usec / 1000);
-        
-    if (end < *t) {
-        reset_stop_watch(t);
-            return 0;
-    }
-        
-    return (int)(end - *t);
-}
