@@ -404,6 +404,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd,
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
+	case WM_CLOSE:
+		if (MessageBox(hWnd, "終了しますか？", conf_window_title, MB_OKCANCEL)
+			== IDOK)
+			DestroyWindow(hWnd);
+		return 0;
 	case WM_LBUTTONDOWN:
 		on_event_mouse_press(MOUSE_LEFT, LOWORD(lParam) - nOffsetX,
 							 HIWORD(lParam) - nOffsetY);
@@ -463,6 +468,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd,
 		break;
 	case WM_SYSCHAR:
 		return 0;
+	case WM_NCLBUTTONDBLCLK:
+		if(wParam == HTCAPTION)
+		{
+			ToggleFullScreen();
+			return 0;
+		}
+		break;
 	case WM_SYSCOMMAND:
 		if(wParam == SC_MAXIMIZE)
 		{
