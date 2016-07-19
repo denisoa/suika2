@@ -1,4 +1,4 @@
-Suika 2.0.0-preview15
+Suika 2.0.0-preview16
 =====================
 
 Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
@@ -41,6 +41,8 @@ Copyright (C) 2001-2016 TABATA Keiichi. All rights reserved.
     * MITライセンスです(COPYINGをご覧ください)
 
 * ChangeLog
+    * Suika 2.0.0-preview16 2016/07/19
+        * Macアプリの起動時に空白のウィンドウが表示されるのを改善
     * Suika 2.0.0-preview15 2016/07/18
         * Macでのフルスクリーンモードに対応(Mac OS X 10.7以降)
     * Suika 2.0.0-preview14 2016/07/17
