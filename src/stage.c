@@ -275,7 +275,7 @@ static bool setup_selbox(void)
 		return false;
 	selbox_fg_image = create_image_from_file(CG_DIR, conf_selbox_fg_file);
 	if (selbox_fg_image == NULL) {
-		log_file_open(conf_selbox_fg_file);
+		log_dir_file_open(CG_DIR, conf_selbox_fg_file);
 		log_script_exec_footer();
 		return false;
 	}
@@ -305,7 +305,7 @@ static bool setup_save(void)
 	/* セーブ画面(非選択)の画像を読み込む */
 	save_fg_image = create_image_from_file(CG_DIR, conf_save_fg_file);
 	if (save_fg_image == NULL) {
-		log_file_open(conf_save_fg_file);
+		log_dir_file_open(CG_DIR, conf_save_fg_file);
 		log_script_exec_footer();
 		return false;
 	}

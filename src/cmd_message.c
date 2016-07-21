@@ -62,6 +62,9 @@ static bool history_flag;
 /* セーブ画面から戻ったばかりであるか */
 static bool restore_flag;
 
+/* メッセージの登録が完了したか */
+static bool is_registered;
+
 /*
  * 前方参照
  */
@@ -163,6 +166,9 @@ static bool init(void)
 	if (!process_serif_command())
 		return false;
 
+	/* セリフが登録・表示されたことを記録する */
+	is_registered = true;
+
 	/* メッセージを取得する */
 	msg = get_command_type() == COMMAND_MESSAGE ?
 		get_line_string() : get_string_param(SERIF_PARAM_MESSAGE);
@@ -233,7 +239,7 @@ static bool register_message_for_history(void)
 
 	/* セーブ画面から戻ったばかりの場合、2重登録を防ぐ */
 	restore_flag = check_restore_flag();
-	if (restore_flag)
+	if (restore_flag && is_registered)
 		return true;
 
 	/* 名前、ボイスファイル名、メッセージを取得する */
@@ -275,9 +281,11 @@ static bool process_serif_command(void)
 	}
 
 	/* ボイスを再生する */
-	if (!is_control_pressed && !history_flag && !restore_flag)
+	if (!is_control_pressed && !history_flag &&
+	    (!restore_flag || !is_registered)) {
 		if (!play_voice())
 			return false;
+	}
 
 	/* 名前を描画する */
 	draw_namebox();
@@ -498,6 +506,9 @@ static bool cleanup(void)
 
 	/* クリックアニメーションを非表示にする */
 	show_click(false);
+
+	/* 登録・表示済みであるかをクリアする */
+	is_registered = false;
 
 	/* 次のコマンドに移動する */
 	if (!move_to_next_command())

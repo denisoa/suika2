@@ -774,7 +774,7 @@ static bool deserialize_stage(struct rfile *rf)
 	if (strcmp(s, "none") != 0) {
 		img = create_image_from_file(BG_DIR, s);
 		if (img == NULL) {
-			log_file_open(s);
+			log_dir_file_open(BG_DIR, s);
 			return false;
 		}
 	} else {
@@ -796,7 +796,7 @@ static bool deserialize_stage(struct rfile *rf)
 		if (strcmp(s, "none") != 0) {
 			img = create_image_from_file(CH_DIR, s);
 			if (img == NULL) {
-				log_file_open(s);
+				log_dir_file_open(CH_DIR, s);
 				return false;
 			}
 		} else {

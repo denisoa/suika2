@@ -27,11 +27,8 @@
 enum {
     KC_SPACE = 49,
     KC_RETURN = 36,
-    KC_ESCAPE = 53,
     KC_UP = 126,
     KC_DOWN = 125,
-    KC_PAGE_UP = 116,
-    KC_PAGE_DOWN = 121
 };
 
 //

@@ -16,7 +16,7 @@
 @bg menu.png 1.0
 
 :MENU
-@menu menu.png menu_selected.png START 945 339 300 90 LOAD 990 462 260 80 QUIT 1004 569 244 91
+@menu menu.png menu_selected.png START 27 485 317 193 LOAD 357 493 318 213 QUIT 678 492 315 191
 
 :START
 @se click.ogg

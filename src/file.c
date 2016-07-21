@@ -166,6 +166,7 @@ struct rfile *open_rfile(const char *dir, const char *file, bool save_data)
 
 	/* パッケージがなければエラーとする */
 	if (package_path == NULL) {
+		log_dir_file_open(dir, file);
 		free(rf);
 		return NULL;
 	}
@@ -178,7 +179,7 @@ struct rfile *open_rfile(const char *dir, const char *file, bool save_data)
 	}
 	if (i == entry_count) {
 		/* みつからなかった場合 */
-		log_file_open(entry_name);
+		log_dir_file_open(dir, file);
 		free(rf);
 		return NULL;
 	}

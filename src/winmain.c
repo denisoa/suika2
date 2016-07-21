@@ -36,9 +36,6 @@
 /* 1回にスリープする時間 */
 #define SLEEP_MILLI		(5)
 
-/* ウィンドウタイトル */
-static const char szTitle[] = "suika";
-
 /* ウィンドウクラス名 */
 static const char szWindowClass[] = "suika";
 
@@ -247,7 +244,7 @@ static BOOL InitWindow(HINSTANCE hInstance, int nCmdShow)
 		 GetSystemMetrics(SM_CYFIXEDFRAME) * 2;
 
 	/* ウィンドウを作成する */
-	hWndMain = CreateWindowEx(0, szWindowClass, szTitle, style,
+	hWndMain = CreateWindowEx(0, szWindowClass, conf_window_title, style,
 							  (int)CW_USEDEFAULT, (int)CW_USEDEFAULT,
 							  conf_window_width + dw, conf_window_height + dh,
 							  NULL, NULL, hInstance, NULL);

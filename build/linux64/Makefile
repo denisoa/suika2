@@ -82,7 +82,7 @@ include ../sse.mk
 #
 
 run: suika
-	cp suika ../../suika2; cd ../../suika2; ./suika
+	cp suika ../../suika2/suika-linux64; cd ../../suika2; ./suika-linux64
 
 install: suika
 	cp suika ../../suika2/suika-linux64

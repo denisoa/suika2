@@ -44,6 +44,14 @@ void log_ch_position(const char *pos)
 /*
  * ファイルオープンエラーを記録する
  */
+void log_dir_file_open(const char *dir, const char *file)
+{
+	log_error("ファイル\"%s/%s\"を開けません。\n", dir, file);
+}
+
+/*
+ * ファイルオープンエラーを記録する
+ */
 void log_file_open(const char *fname)
 {
 	log_error("ファイル\"%s\"を開けません。\n", fname);
