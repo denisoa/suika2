@@ -17,8 +17,7 @@ CPPFLAGS = \
 #
 
 CFLAGS = \
-	-O0 \
-	-g3 \
+	-O3 \
 	-ftree-vectorize \
 	-fopt-info-vec \
 	-std=gnu89 \
@@ -60,7 +59,7 @@ $(SRCS_SSE) \
 OBJS = $(SRCS:../../src/%.c=%.o) \
 
 %.o: ../../src/%.c
-	$(CC) -c $(CPPFLAGS) -O0 $(CFLAGS) $<
+	$(CC) -c $(CPPFLAGS) $(CFLAGS) $<
 
 #
 # Target
@@ -83,7 +82,10 @@ include ../sse.mk
 #
 
 run: suika
-	cp suika ../../suika2; cd ../../suika2; ./suika
+	cp suika ../../suika2/suika-linux32; cd ../../suika2; ./suika-linux32
+
+install: suika
+	cp suika ../../suika2/suika-linux32
 
 clean:
 	rm -rf *~ *.o suika
