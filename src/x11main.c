@@ -19,8 +19,10 @@
 #include <X11/xpm.h>
 #include <X11/Xatom.h>
 
-#include <unistd.h>	/* usleep() */
+#include <sys/types.h>
+#include <sys/stat.h>	/* stat(), mkdir() */
 #include <sys/time.h>	/* gettimeofday() */
+#include <unistd.h>	/* usleep() */
 
 #include "suika.h"
 #include "asound.h"
@@ -772,6 +774,19 @@ bool log_error(const char *s, ...)
 			return false;
 	}
 	va_end(ap);
+	return true;
+}
+
+/*
+ * セーブディレクトリを作成する
+ */
+bool make_sav_dir(void)
+{
+	struct stat st = {0};
+
+	if (stat(SAVE_DIR, &st) == -1)
+		mkdir(SAVE_DIR, 0700);
+
 	return true;
 }
 

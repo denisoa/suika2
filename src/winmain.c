@@ -650,6 +650,15 @@ bool log_error(const char *s, ...)
 }
 
 /*
+ * セーブディレクトリを作成する
+ */
+bool make_sav_dir(void)
+{
+	CreateDirectory(SAVE_DIR, NULL);
+	return true;
+}
+
+/*
  * データのディレクトリ名とファイル名を指定して有効なパスを取得する
  */
 char *make_valid_path(const char *dir, const char *fname)

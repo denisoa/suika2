@@ -24,6 +24,9 @@ bool log_info(const char *s, ...);
 bool log_warn(const char *s, ...);
 bool log_error(const char *s, ...);
 
+/* セーブディレクトリを作成する */
+bool make_sav_dir(void);
+
 /* データのディレクトリ名とファイル名を指定して有効なパスを取得する */
 char *make_valid_path(const char *dir, const char *fname);
 

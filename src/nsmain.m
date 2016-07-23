@@ -283,6 +283,33 @@ static BOOL initWindow(void)
 //
 
 //
+// セーブディレクトリを作成する
+//
+bool make_sav_dir(void)
+{
+#if !__has_feature(objc_arc)
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+#else
+    @autoreleasepool {
+#endif
+    NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
+    NSString *basePath = [bundlePath stringByDeletingLastPathComponent];
+    NSString *savePath = [NSString stringWithFormat:@"%@/%s", basePath,
+                                   SAVE_DIR];
+    NSError *error;
+    [[NSFileManager defaultManager] createDirectoryAtPath:savePath
+                              withIntermediateDirectories:NO
+                                               attributes:nil
+                                                    error:&error];
+#if !__has_feature(objc_arc)
+    [pool release];
+#else
+    }
+#endif
+	return true;
+}
+
+//
 // データファイルのディレクトリ名とファイル名を指定して有効なパスを取得する
 //
 char *make_valid_path(const char *dir, const char *fname)

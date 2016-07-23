@@ -18,7 +18,7 @@
 /*
  * 変数の数
  */
-#define VAR_SIZE	(256)
+#define VAR_SIZE	(1024)
 
 /* 変数を取得する */
 int32_t get_variable(int index);

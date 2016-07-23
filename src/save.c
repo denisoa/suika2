@@ -564,6 +564,9 @@ static bool process_save(void)
 	int index;
 	bool success;
 
+	/* セーブディレクトリを作成する */
+	make_sav_dir();
+
 	/* ファイル名を求める */
 	index = page * PAGE_SLOTS + (selected_index - BUTTON_ONE);
 	snprintf(file, sizeof(file), "%03d.sav", index);
