@@ -27,6 +27,20 @@
 #endif
 
 /*
+ * image構造体
+ */
+struct image {
+	int width;			/* 水平方向のピクセル数 */
+	int height;			/* 垂直方向のピクセル数 */
+#ifndef SSE_VERSIONING
+	pixel_t * RESTRICT pixels;	/* ピクセル列 */
+#else
+	ALIGN_DECL(SSE_ALIGN, pixel_t * RESTRICT pixels);
+#endif
+	bool need_free;			/* pixelsを解放する必要があるか */
+};
+
+/*
  * 前方参照
  */
 static bool clip_by_source(int src_cx, int src_cy, int *cx, int *cy,

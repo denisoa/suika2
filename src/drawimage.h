@@ -36,16 +36,18 @@ void DRAW_BLEND_NONE(
 #else
 {
 	pixel_t * RESTRICT src_ptr, * RESTRICT dst_ptr;
-	int x, y;
+	int x, y, sw, dw;
 
-	src_ptr = src_image->pixels + src_image->width * src_top + src_left;
-	dst_ptr = dst_image->pixels + dst_image->width * dst_top + dst_left;
+	sw = get_image_width(src_image);
+	dw = get_image_width(dst_image);
+	src_ptr = get_image_pixels(src_image) + sw * src_top + src_left;
+	dst_ptr = get_image_pixels(dst_image) + dw * dst_top + dst_left;
 
 	for(y=0; y<height; y++) {
 		for(x = 0; x < width; x++)
 			*(dst_ptr + x) = *(src_ptr + x);
-		src_ptr += src_image->width;
-		dst_ptr += dst_image->width;
+		src_ptr += sw;
+		dst_ptr += dw;
 	}
 }
 #endif
@@ -71,12 +73,14 @@ void DRAW_BLEND_FAST(
 	pixel_t * RESTRICT src_ptr, * RESTRICT dst_ptr;
 	float a, src_r, src_g, src_b, src_a, dst_r, dst_g, dst_b, dst_a;
 	uint32_t src_pix, dst_pix;
-	int src_line_inc, dst_line_inc, x, y;
+	int src_line_inc, dst_line_inc, x, y, sw, dw;
 
-	src_ptr = src_image->pixels + src_image->width * src_top + src_left;
-	dst_ptr = dst_image->pixels + dst_image->width * dst_top + dst_left;
-	src_line_inc = src_image->width - width;
-	dst_line_inc = dst_image->width - width;
+	sw = get_image_width(src_image);
+	dw = get_image_width(dst_image);
+	src_ptr = get_image_pixels(src_image) + sw * src_top + src_left;
+	dst_ptr = get_image_pixels(dst_image) + dw * dst_top + dst_left;
+	src_line_inc = sw - width;
+	dst_line_inc = dw - width;
 	a = (float)alpha / 255.0f;
 
 	for(y=0; y<height; y++) {
@@ -131,12 +135,14 @@ void DRAW_BLEND_NORMAL(
 	pixel_t * RESTRICT src_ptr, * RESTRICT dst_ptr;
 	float a, pix_a, src_r, src_g, src_b, dst_r, dst_g, dst_b;
 	uint32_t src_pix, dst_pix, src_a, dst_a, add_a;
-	int src_line_inc, dst_line_inc, x, y;
+	int src_line_inc, dst_line_inc, x, y, sw, dw;
 
-	src_ptr = src_image->pixels + src_image->width * src_top + src_left;
-	dst_ptr = dst_image->pixels + dst_image->width * dst_top + dst_left;
-	src_line_inc = src_image->width - width;
-	dst_line_inc = dst_image->width - width;
+	sw = get_image_width(src_image);
+	dw = get_image_width(dst_image);
+	src_ptr = get_image_pixels(src_image) + sw * src_top + src_left;
+	dst_ptr = get_image_pixels(dst_image) + dw * dst_top + dst_left;
+	src_line_inc = sw - width;
+	dst_line_inc = dw - width;
 	a = (float)alpha / 255.0f;
 
 	for(y=0; y<height; y++) {
@@ -197,12 +203,14 @@ void DRAW_BLEND_ADD(
 	uint32_t src_r, src_g, src_b, src_a;
 	uint32_t dst_r, dst_g, dst_b, dst_a;
 	uint32_t sadd_r, sadd_g, sadd_b, sadd_a;
-	int src_line_inc, dst_line_inc, x, y;
+	int src_line_inc, dst_line_inc, x, y, sw, dw;
 
-	src_ptr = src_image->pixels + src_image->width * src_top + src_left;
-	dst_ptr = dst_image->pixels + dst_image->width * dst_top + dst_left;
-	src_line_inc = src_image->width - width;
-	dst_line_inc = dst_image->width - width;
+	sw = get_image_width(src_image);
+	dw = get_image_width(dst_image);
+	src_ptr = get_image_pixels(src_image) + sw * src_top + src_left;
+	dst_ptr = get_image_pixels(dst_image) + dw * dst_top + dst_left;
+	src_line_inc = sw - width;
+	dst_line_inc = dw - width;
 	a = (float)alpha / 255.0f;
 
 	for(y=0; y<height; y++) {
@@ -269,12 +277,14 @@ void DRAW_BLEND_SUB(
 	uint32_t src_r, src_g, src_b, src_a;
 	uint32_t dst_r, dst_g, dst_b, dst_a;
 	uint32_t sadd_r, sadd_g, sadd_b, sadd_a;
-	int src_line_inc, dst_line_inc, x, y;
+	int src_line_inc, dst_line_inc, x, y, sw, dw;
 
-	src_ptr = src_image->pixels + src_image->width * src_top + src_left;
-	dst_ptr = dst_image->pixels + dst_image->width * dst_top + dst_left;
-	src_line_inc = src_image->width - width;
-	dst_line_inc = dst_image->width - width;
+	sw = get_image_width(src_image);
+	dw = get_image_width(dst_image);
+	src_ptr = get_image_pixels(src_image) + sw * src_top + src_left;
+	dst_ptr = get_image_pixels(dst_image) + dw * dst_top + dst_left;
+	src_line_inc = sw - width;
+	dst_line_inc = dw - width;
 	a = (float)alpha / 255.0f;
 
 	for(y=0; y<height; y++) {
