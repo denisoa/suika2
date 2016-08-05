@@ -1,0 +1,183 @@
+/* -*- coding: utf-8; tab-width: 4; indent-tabs-mode: t; -*- */
+
+/*
+ * Suika 2
+ * Copyright (C) 2001-2016, TABATA Keiichi. All rights reserved.
+ */
+
+package jp.luxion.suika;
+
+import android.app.Activity;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.os.Handler;
+import android.os.Message;
+import android.os.Bundle;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+public class MainActivity extends Activity {
+	static {
+		System.loadLibrary("suika");
+	}
+
+	/** 60fpsを実現するための待ち時間です。 */
+	private static final int DELAY = 0;
+
+	/** Viewです。 */
+	private MainView view;
+
+	/** フレームを処理するためのHandlerです。 */
+	private Handler handler;
+
+	/** 背景ビットマップです。 */
+	private Bitmap backBitmap;
+
+	/**
+	 * アクティビティが作成されるときに呼ばれます。
+	 */
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		// フルスクリーンにする
+		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+		// JNIコードで初期化処理を実行する
+		backBitmap = init();
+		if(backBitmap == null)
+			throw new RuntimeException("onCreate() returned false");
+
+		// ビューを作成してセットする
+		view = new MainView(this);
+		setContentView(view);
+	}
+
+	/**
+	 * ビューです。
+	 */
+	private class MainView extends View {
+		/**
+		 * コンストラクタです。
+		 */
+		public MainView(Context context) {
+			super(context);
+			setFocusable(true);
+		}
+
+		/**
+		 * ビューのサイズが決定した際に呼ばれます。
+		 */
+		@Override
+		protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+			// TODO: スクリーンの倍率やオフセットを求める
+		}
+
+		/**
+		 * 表示される際に呼ばれます。
+		 */
+		@Override
+		protected void onAttachedToWindow() {
+			handler = new Handler() {
+				public void handleMessage(Message msg) {
+					// ビューがデタッチされた場合は処理しない
+					if (handler == null)
+						return;
+
+					// JNIコードでフレームを処理する
+					if (!frame()) {
+						// 更新領域がない場合、タイマをセットする
+						sendEmptyMessageDelayed(0, DELAY);
+					} else {
+						// 更新領域がある場合、onDraw()で処理を継続する
+						view.invalidate();
+					}
+				}
+			};
+			handler.sendEmptyMessage(0);
+			super.onAttachedToWindow();
+		}
+
+		/**
+		 * 表示されなくなる際に呼ばれます。
+		 */
+		@Override
+		protected void onDetachedFromWindow() {
+			handler = null;
+			super.onDetachedFromWindow();
+			cleanup();
+		}
+
+		/**
+		 * フレーム処理の後半で、実際の描画を行う際に呼ばれます。
+		 */
+		@Override
+		protected void onDraw(Canvas canvas) {
+			// 描画を行う
+			Paint paint = new Paint();
+			canvas.drawBitmap(backBitmap, 0, 0, paint);
+
+			// フレーム処理時刻を更新する
+			handler.sendEmptyMessageDelayed(0, DELAY);
+		}
+
+		/**
+		 * タッチされた際に呼ばれます。
+		 */
+		@Override
+		public boolean onTouchEvent(MotionEvent event) {
+			float x = event.getX();
+			float y = event.getY();
+			return true;
+		}
+	}
+
+	/*
+	 * ネイティブメソッド
+	 */
+
+	/** 初期化処理を行います。 */
+	private native Bitmap init();
+
+	/** 終了処理を行います。 */
+	private native void cleanup();
+
+	/** フレーム処理を行います。 */
+	private native boolean frame();
+
+	/*
+	 * JNIコード用のユーティリティ
+	 */
+
+	/** 指定されたサイズのビットマップを作成します。 */
+	private Bitmap createBitmap(int w, int h) {
+		return Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+	}
+
+	/** 指定されたassetからビットマップを作成します。 */
+	private Bitmap loadBitmap(String fileName) {
+		try {
+			InputStream is = getResources().getAssets().open(fileName);
+			return BitmapFactory.decodeStream(is);
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to load image " + fileName);
+		}
+	}
+}
+
+/*
+	private boolean executeFrame() {
+		backImage.eraseColor(0xff000000 | color);
+		color += 20;
+		return true;
+	}
+*/

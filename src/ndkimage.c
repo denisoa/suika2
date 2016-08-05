@@ -1,0 +1,185 @@
+﻿/* -*- coding: utf-8-with-signature; tab-width: 8; indent-tabs-mode: t; -*- */
+
+/*
+ * Suika 2
+ * Copyright (C) 2001-2016, TABATA Keiichi. All rights reserved.
+ */
+
+/*
+ * [Changes]
+ *  2001-10-03 作成 [KImage@VNStudio]
+ *  2002-03-10 アルファブレンド対応, 乗算テーブル [VNImage@西瓜Studio]
+ *  2004-01-05 MMX対応 [LXImage@Texture Alpha Maker]
+ *  2006-09-05 Cに書き換え [VImage@V]
+ *  2016-05-27 gcc5.3.1のベクトル化に対応, 浮動小数点 [image@Suika]
+ *  2016-06-11 SSEバージョニングを実装
+ *  2016-06-16 OSX対応
+ *  2016-08-05 Android NDK対応
+ */
+
+#include "image.h"
+#include "ndkmain.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <android/bitmap.h>
+
+/*
+ * image構造体
+ */
+struct image {
+	jobject bm;
+	int width;
+	int height;
+};
+
+/*
+ * イメージを作成する
+ */
+struct image *create_image(int w, int h)
+{
+	struct image *img;
+	jclass cls;
+	jmethodID mid;
+
+	/* image構造体のメモリを確保する */
+	img = (struct image *)malloc(sizeof(struct image));
+	if (img == NULL)
+		return NULL;
+
+	/* Bitmapを作成する */
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "createBitmap", "(II)Landroid/graphics/Bitmap;");
+	img->bm = (*jni_env)->CallObjectMethod(jni_env, main_activity, mid, w, h);
+	img->bm = (*jni_env)->NewGlobalRef(jni_env, img->bm);
+	img->width = w;
+	img->height = h;
+
+	return img;
+}
+
+/*
+ * ファイル名を指定してイメージを作成する
+ */
+struct image *create_image_from_file(const char *dir, const char *file)
+{
+	char buf[1024];
+	AndroidBitmapInfo info;
+	struct image *img;
+	jclass cls;
+	jmethodID mid;
+
+	/* パスを作成する */
+	snprintf(buf, sizeof(buf), "%s/%s", dir, file);
+
+	/* image構造体のメモリを確保する */
+	img = (struct image *)malloc(sizeof(struct image));
+	if (img == NULL)
+		return NULL;
+
+	/* Bitmapを作成する */
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "loadBitmap", "(Ljava/lang/String;)Landroid/graphics/Bitmap;");
+	img->bm = (*jni_env)->CallObjectMethod(jni_env, main_activity, mid, (*jni_env)->NewStringUTF(jni_env, buf));
+	img->bm = (*jni_env)->NewGlobalRef(jni_env, img->bm);
+
+	/* Bitmapの幅と高さを取得する */
+	AndroidBitmap_getInfo(jni_env, img->bm, &info);
+	img->width = (int)info.width;
+	img->height = (int)info.height;
+
+	return img;
+}
+
+/*
+ * イメージを削除する
+ */
+void destroy_image(struct image *img)
+{
+	/* Bitmapを破棄する */
+	(*jni_env)->DeleteGlobalRef(jni_env, img->bm);
+	img->bm = NULL;
+	free(img);
+}
+
+/*
+ * イメージに関連付けられたシステムのオブジェクトを取得する
+ */
+void *get_image_system_object(struct image *img)
+{
+	return img->bm;
+}
+
+/*
+ * イメージの幅を取得する
+ */
+int get_image_width(struct image *img)
+{
+	return img->width;
+}
+
+/*
+ * イメージの高さを取得する
+ */
+int get_image_height(struct image *img)
+{
+	return img->height;
+}
+
+/*
+ * イメージを黒色でクリアする
+ */
+void clear_image_black(struct image *img)
+{
+}
+
+/*
+ * イメージの矩形を黒色でクリアする
+ */
+void clear_image_black_rect(struct image *img, int x, int y, int w, int h)
+{
+}
+
+/*
+ * イメージを白色でクリアする
+ */
+void clear_image_white(struct image *img)
+{
+}
+
+/*
+ * イメージの矩形を白色でクリアする
+ */
+void clear_image_white_rect(struct image *img, int x, int y, int w, int h)
+{
+}
+
+/*
+ * イメージを色でクリアする
+ */
+void clear_image_color(struct image *img, pixel_t color)
+{
+}
+
+/*
+ * イメージの矩形を色でクリアする
+ */
+void clear_image_color_rect(struct image *img, int x, int y, int w, int h,
+			    pixel_t color)
+{
+}
+
+/* イメージのアルファ値をゼロにする */
+void erase_image_alpha(struct image *img)
+{
+}
+
+/*
+ * イメージを描画する
+ */
+void draw_image(struct image * RESTRICT dst_image, int dst_left, int dst_top,
+		struct image * RESTRICT src_image, int width, int height,
+		int src_left, int src_top, int alpha, int bt)
+{
+}
