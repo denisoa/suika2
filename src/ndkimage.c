@@ -106,7 +106,7 @@ void destroy_image(struct image *img)
 /*
  * イメージに関連付けられたシステムのオブジェクトを取得する
  */
-void *get_image_system_object(struct image *img)
+void *get_image_object(struct image *img)
 {
 	return img->bm;
 }
@@ -132,6 +132,8 @@ int get_image_height(struct image *img)
  */
 void clear_image_black(struct image *img)
 {
+	clear_image_color_rect(img, 0, 0, img->width, img->height,
+			       make_pixel(0xff, 0, 0, 0));
 }
 
 /*
@@ -139,6 +141,7 @@ void clear_image_black(struct image *img)
  */
 void clear_image_black_rect(struct image *img, int x, int y, int w, int h)
 {
+	clear_image_color_rect(img, x, y, w, h, make_pixel(0xff, 0, 0, 0));
 }
 
 /*
@@ -146,6 +149,8 @@ void clear_image_black_rect(struct image *img, int x, int y, int w, int h)
  */
 void clear_image_white(struct image *img)
 {
+	clear_image_color_rect(img, 0, 0, img->width, img->height,
+			       make_pixel(0xff, 0xff, 0xff, 0xff));
 }
 
 /*
@@ -153,6 +158,8 @@ void clear_image_white(struct image *img)
  */
 void clear_image_white_rect(struct image *img, int x, int y, int w, int h)
 {
+	clear_image_color_rect(img, x, y, w, h,
+			       make_pixel(0xff, 0xff, 0xff, 0xff));
 }
 
 /*
@@ -160,6 +167,7 @@ void clear_image_white_rect(struct image *img, int x, int y, int w, int h)
  */
 void clear_image_color(struct image *img, pixel_t color)
 {
+	clear_image_color_rect(img, 0, 0, img->width, img->height, color);
 }
 
 /*
@@ -168,11 +176,13 @@ void clear_image_color(struct image *img, pixel_t color)
 void clear_image_color_rect(struct image *img, int x, int y, int w, int h,
 			    pixel_t color)
 {
-}
+	jclass cls;
+	jmethodID mid;
 
-/* イメージのアルファ値をゼロにする */
-void erase_image_alpha(struct image *img)
-{
+	/* 矩形を描画する */
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "drawRect", "(Landroid/graphics/Bitmap;IIIII)V");
+	(*jni_env)->CallVoidMethod(jni_env, main_activity, mid, img->bm, x, y, w, h, color);
 }
 
 /*
@@ -182,4 +192,11 @@ void draw_image(struct image * RESTRICT dst_image, int dst_left, int dst_top,
 		struct image * RESTRICT src_image, int width, int height,
 		int src_left, int src_top, int alpha, int bt)
 {
+	jclass cls;
+	jmethodID mid;
+
+	/* 矩形を描画する */
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "drawBitmap", "(Landroid/graphics/Bitmap;IILandroid/graphics/Bitmap;IIIII)V");
+	(*jni_env)->CallVoidMethod(jni_env, main_activity, mid, dst_image->bm, dst_left, dst_top, src_image->bm, width, height, src_left, src_top, alpha);
 }

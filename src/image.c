@@ -259,31 +259,6 @@ void clear_image_color_rect(struct image *img, int x, int y, int w, int h,
 }
 
 /*
- * イメージのアルファ値をゼロにする
- */
-void erase_image_alpha(struct image *img)
-{
-	pixel_t *p, tmp;
-	int x, y;
-
-	assert(img != NULL);
-	assert(img->width > 0 && img->height > 0);
-	assert(img->pixels != NULL);
-
-	/* ピクセル列全体をクリアする */
-	p = img->pixels;
-	for (y = 0; y < img->height; y++) {
-		for (x = 0; x < img->width; x++) {
-			tmp = *p;
-			*p++ = make_pixel(0,
-					  get_pixel_r(tmp),
-					  get_pixel_g(tmp),
-					  get_pixel_b(tmp));
-		}
-	}
-}
-
-/*
  * 描画
  */
 

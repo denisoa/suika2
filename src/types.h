@@ -25,6 +25,10 @@
 #define OSX
 #elif defined(_WIN32)
 #define WIN
+#elif defined(__ANDROID__)
+#ifndef ANDROID
+#define ANDROID
+#endif
 #else
 #define LINUX
 #endif
@@ -50,7 +54,8 @@
 /* x86/x86_64のSSEバージョニングを行うか */
 #if defined(__GNUC__) && \
     !defined(__INTEL_COMPILER) && \
-    (defined(__i386__) || defined(__x86_64__))
+    (defined(__i386__) || defined(__x86_64__)) && \
+    !defined(ANDROID)
 #define SSE_VERSIONING
 #endif
 
@@ -88,7 +93,7 @@
 #endif
 
 /* x86/x86_64のSSEバージョニングを行うか */
-#if (defined(__i386__) || defined(__x86_64__))
+#if (defined(__i386__) || defined(__x86_64__)) && !defined(ANDROID)
 #define SSE_VERSIONING
 #endif
 

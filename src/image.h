@@ -14,6 +14,7 @@
  *  2016-05-27 gcc5.3.1のベクトル化に対応, 浮動小数点 [image@Suika]
  *  2016-06-11 SSEバージョニングを実装
  *  2016-06-16 OSX対応
+ *  2016-08-05 Android NDK対応
  */
 
 #ifndef SUIKA_IMAGE_H
@@ -40,8 +41,8 @@ enum blend_type {
 	BLEND_SUB,			/* 飽和減算ブレンド */
 };
 
-/* WindowsとX11の場合はARGB形式(バイト順にBGRA) */
-#if defined(WIN) || defined(LINUX)
+/* WindowsとX11とAndroidの場合はARGB形式(バイト順にBGRA) */
+#if defined(WIN) || defined(LINUX) || defined(ANDROID)
 
 /* ピクセル値を合成する */
 static INLINE pixel_t make_pixel(uint32_t a, uint32_t r, uint32_t g,
@@ -124,8 +125,11 @@ struct image *create_image_from_file(const char *dir, const char *file);
 /* イメージを削除する */
 void destroy_image(struct image *img);
 
-/* ピクセルへのポインタを取得する */
+/* ピクセルへのポインタを取得する(for glyph.c) */
 pixel_t *get_image_pixels(struct image *img);
+
+/* イメージに関連付けられたオブジェクトを取得する(for NDK, iOS) */
+void *get_image_object(struct image *img);
 
 /* イメージの幅を取得する */
 int get_image_width(struct image *img);
@@ -151,9 +155,6 @@ void clear_image_color(struct image *img, pixel_t color);
 /* イメージの矩形を色でクリアする */
 void clear_image_color_rect(struct image *img, int x, int y, int w, int h,
 			    pixel_t color);
-
-/* イメージのアルファ値をゼロにする */
-void erase_image_alpha(struct image *img);
 
 /* イメージを描画する */
 void draw_image(struct image * RESTRICT dst_image, int dst_left, int dst_top,

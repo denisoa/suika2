@@ -27,6 +27,8 @@ JNIEnv *jni_env;
  */
 static struct image *back_image;
 
+static struct image *fore_image;
+
 /*
  * 初期化処理を行います。
  */
@@ -44,9 +46,17 @@ Java_jp_luxion_suika_MainActivity_init(
 	jni_env = env;
 
 	/* 背景イメージを作成する */
+	back_image = create_image(1280, 720);
+	back_bitmap = (jobject)get_image_object(back_image);
+
+	/* test you no image wo sakusei suru */
+	fore_image = create_image_from_file("ch", "001-fun.png");
+
+	/*
 	back_image = create_image_from_file("bg", "roof.png");
 	back_bitmap = (jobject)get_image_system_object(back_image);
-	/* 
+	*/
+	/*
          * jclass cls = (*env)->FindClass(env, "jp/luxion/suika/MainActivity");
 	 * jmethodID mid = (*env)->GetMethodID(env, cls, "loadBitmap", "(Ljava/lang/String;)Landroid/graphics/Bitmap;");
 	 * backImage = (*env)->CallObjectMethod(env, instance, mid, (*env)->NewStringUTF(env, "bg/roof.png"));
@@ -90,8 +100,19 @@ Java_jp_luxion_suika_MainActivity_frame(
 	JNIEnv *env,
 	jobject instance)
 {
+	static int alpha = 0;
+
 	/* この関数呼び出しの間だけenvをグローバル変数で参照する */
 	jni_env = env;
+
+	clear_image_color(back_image, 0xff0000ff);
+
+	draw_image(back_image, 0, 0, fore_image,
+		   get_image_width(fore_image),
+		   get_image_height(fore_image),
+		   0, 0, alpha, BLEND_NORMAL);
+
+	alpha = (alpha + 1) % 256;
 
 	/* envをグローバル変数で参照するのを終了する */
 	jni_env = NULL;

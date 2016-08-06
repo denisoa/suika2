@@ -12,7 +12,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
@@ -155,15 +157,15 @@ public class MainActivity extends Activity {
 	private native boolean frame();
 
 	/*
-	 * JNIコード用のユーティリティ
+	 * ndkimage.cのためのユーティリティ
 	 */
 
-	/** 指定されたサイズのビットマップを作成します。 */
+	/** ビットマップを作成します。 */
 	private Bitmap createBitmap(int w, int h) {
 		return Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 	}
 
-	/** 指定されたassetからビットマップを作成します。 */
+	/** assetからビットマップを作成します。 */
 	private Bitmap loadBitmap(String fileName) {
 		try {
 			InputStream is = getResources().getAssets().open(fileName);
@@ -171,6 +173,26 @@ public class MainActivity extends Activity {
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to load image " + fileName);
 		}
+	}
+
+	/** Bitmapに矩形を描画します。 */
+	private void drawRect(Bitmap bm, int x, int y, int w, int h, int color) {
+		Canvas canvas = new Canvas(bm);
+		Paint paint = new Paint();
+		Rect rect = new Rect(x, y, x+w-1, y+h-1);
+		paint.setColor(color);
+		paint.setStyle(Paint.Style.FILL);
+		canvas.drawRect(rect, paint);
+	}
+
+	/** BitmapにBitmapを描画します。 */
+	private void drawBitmap(Bitmap dst, int dx, int dy, Bitmap src, int w, int h, int sx, int sy, int alpha) {
+		Canvas canvas = new Canvas(dst);
+		Rect dstRect = new Rect(dx, dy, dx+w-1, dy+h-1);
+		Rect srcRect = new Rect(sx, sy, sx+w-1, sy+h-1);
+		Paint paint = new Paint();
+		paint.setAlpha(alpha);
+		canvas.drawBitmap(src, srcRect, dstRect, paint);
 	}
 }
 
