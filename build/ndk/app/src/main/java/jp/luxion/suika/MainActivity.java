@@ -31,6 +31,12 @@ public class MainActivity extends Activity {
 		System.loadLibrary("suika");
 	}
 
+	/** 仮想ビューポートの幅です。 */
+	private static final int VIEWPORT_WIDTH = 1280;
+
+	/** 仮想ビューポートの高さです。 */
+	private static final int VIEWPORT_HEIGHT = 720;
+
 	/** 60fpsを実現するための待ち時間です。 */
 	private static final int DELAY = 0;
 
@@ -42,6 +48,15 @@ public class MainActivity extends Activity {
 
 	/** 背景ビットマップです。 */
 	private Bitmap backBitmap;
+
+	/** Paintです。 */
+	private Paint paint;
+
+	/** 転送元のRectです。 */
+	private Rect srcRect;
+
+	/** 転送先のRectです。 */
+	private Rect dstRect;
 
 	/**
 	 * アクティビティが作成されるときに呼ばれます。
@@ -81,7 +96,24 @@ public class MainActivity extends Activity {
 		 */
 		@Override
 		protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-			// TODO: スクリーンの倍率やオフセットを求める
+			// ビューポートの拡大率を求める
+			float scaleX = (float)w / VIEWPORT_WIDTH;
+			float scaleY = (float)h / VIEWPORT_HEIGHT;
+			float scale = scaleX > scaleY ? scaleY : scaleX;
+
+			// 実際に描画する領域のサイズを求める
+			int width = (int)(VIEWPORT_WIDTH * scale);
+			int height = (int)(VIEWPORT_HEIGHT * scale);
+
+			// 実際に描画する領域のオフセットを求める
+			int offsetX = (w - width) / 2;
+			int offsetY = (h - height) / 2;
+
+			// 描画用のオブジェクトを作成する
+			paint = new Paint();
+			srcRect = new Rect(0, 0, VIEWPORT_WIDTH - 1, VIEWPORT_HEIGHT - 1);
+			dstRect = new Rect(offsetX, offsetY, offsetX + width - 1,
+							   offsetY + height - 1);
 		}
 
 		/**
@@ -125,8 +157,7 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onDraw(Canvas canvas) {
 			// 描画を行う
-			Paint paint = new Paint();
-			canvas.drawBitmap(backBitmap, 0, 0, paint);
+			canvas.drawBitmap(backBitmap, srcRect, dstRect, paint);
 
 			// フレーム処理時刻を更新する
 			handler.sendEmptyMessageDelayed(0, DELAY);
@@ -195,11 +226,3 @@ public class MainActivity extends Activity {
 		canvas.drawBitmap(src, srcRect, dstRect, paint);
 	}
 }
-
-/*
-	private boolean executeFrame() {
-		backImage.eraseColor(0xff000000 | color);
-		color += 20;
-		return true;
-	}
-*/
