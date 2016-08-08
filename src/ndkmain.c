@@ -9,18 +9,18 @@
  * NDKメインモジュール
  */
 
+#include "suika.h"
 #include "ndkmain.h"
-#include "image.h"
-
-/*
- * MainActivityのインスタンスへの参照 
- */
-jobject main_activity;
 
 /*
  * JNI関数呼び出しの間だけ有効なJNIEnvへの参照
  */
 JNIEnv *jni_env;
+
+/*
+ * MainActivityのインスタンスへの参照 
+ */
+jobject main_activity;
 
 /*
  * 背景イメージ
@@ -35,11 +35,12 @@ static struct image *fore_image;
 JNIEXPORT jobject JNICALL
 Java_jp_luxion_suika_MainActivity_init(
 	JNIEnv *env,
-	jobject instance)
+	jobject instance,
+	jobject assetManager)
 {
 	jobject back_bitmap;
 
-	/* アクティビティを保持する */
+	/* Activityを保持する */
 	main_activity = (*env)->NewGlobalRef(env, instance);
 
 	/* この関数呼び出しの間だけenvをグローバル変数で参照する */
@@ -49,18 +50,8 @@ Java_jp_luxion_suika_MainActivity_init(
 	back_image = create_image(1280, 720);
 	back_bitmap = (jobject)get_image_object(back_image);
 
-	/* test you no image wo sakusei suru */
+	/* テスト用のイメージを作成する */
 	fore_image = create_image_from_file("ch", "001-fun.png");
-
-	/*
-	back_image = create_image_from_file("bg", "roof.png");
-	back_bitmap = (jobject)get_image_system_object(back_image);
-	*/
-	/*
-         * jclass cls = (*env)->FindClass(env, "jp/luxion/suika/MainActivity");
-	 * jmethodID mid = (*env)->GetMethodID(env, cls, "loadBitmap", "(Ljava/lang/String;)Landroid/graphics/Bitmap;");
-	 * backImage = (*env)->CallObjectMethod(env, instance, mid, (*env)->NewStringUTF(env, "bg/roof.png"));
-         */
 
 	/* envをグローバル変数で参照するのを終了する */
 	jni_env = NULL;
@@ -107,10 +98,8 @@ Java_jp_luxion_suika_MainActivity_frame(
 
 	clear_image_color(back_image, 0xff0000ff);
 
-	draw_image(back_image, 0, 0, fore_image,
-		   get_image_width(fore_image),
-		   get_image_height(fore_image),
-		   0, 0, alpha, BLEND_NORMAL);
+	draw_image(back_image, 0, 0, fore_image, get_image_width(fore_image),
+		   get_image_height(fore_image), 0, 0, alpha, BLEND_NORMAL);
 
 	alpha = (alpha + 1) % 256;
 
@@ -118,4 +107,117 @@ Java_jp_luxion_suika_MainActivity_frame(
 	jni_env = NULL;
 
 	return JNI_TRUE;
+}
+
+/*
+ * platform.hの実装
+ */
+
+/*
+ * infoログを出力する
+ */
+bool log_info(const char *s, ...)
+{
+	return true;
+}
+
+/*
+ * warnログを出力する
+ */
+bool log_warn(const char *s, ...)
+{
+	return true;
+}
+
+/*
+ * errorログを出力する
+ */
+bool log_error(const char *s, ...)
+{
+	return true;
+}
+
+/*
+ * セーブディレクトリを作成する
+ */
+bool make_sav_dir(void)
+{
+	return true;
+}
+
+/*
+ * データのディレクトリ名とファイル名を指定して有効なパスを取得する
+ */
+char *make_valid_path(const char *dir, const char *fname)
+{
+	/* NDKでは使用しない */
+	assert(0);
+	return NULL;
+}
+
+/*
+ * バックイメージを取得する
+ */
+struct image *get_back_image(void)
+{
+	return back_image;
+}
+
+/*
+ * タイマをリセットする
+ */
+void reset_stop_watch(stop_watch_t *t)
+{
+	jclass cls;
+	jmethodID mid;
+	long ret;
+
+	/* 現在の時刻を取得する */
+	cls = (*jni_env)->FindClass(jni_env, "java/lang/System");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "currentTimeMillis", "()J");
+	ret = (*jni_env)->CallStaticLongMethod(jni_env, cls, mid);
+
+	/* 時刻を格納する */
+	*t = (stop_watch_t)ret;
+}
+
+/*
+ * タイマのラップをミリ秒単位で取得する
+ */
+int get_stop_watch_lap(stop_watch_t *t)
+{
+	jclass cls;
+	jmethodID mid;
+	long ret;
+
+	/* 現在の時刻を取得する */
+	cls = (*jni_env)->FindClass(jni_env, "java/lang/System");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "currentTimeMillis", "()J");
+	ret = (*jni_env)->CallStaticLongMethod(jni_env, cls, mid);
+
+	return (int)(ret - (long)t);
+}
+
+/*
+ * サウンドを再生を開始する
+ */
+bool play_sound(int n, struct wave *w)
+{
+	return true;
+}
+
+/*
+ * サウンドの再生を停止する
+ */
+bool stop_sound(int n)
+{
+	return true;
+}
+
+/*
+ * サウンドのボリュームを設定する
+ */
+bool set_sound_volume(int n, float vol)
+{
+	return true;
 }

@@ -9,6 +9,7 @@ package jp.luxion.suika;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -224,5 +225,23 @@ public class MainActivity extends Activity {
 		Paint paint = new Paint();
 		paint.setAlpha(alpha);
 		canvas.drawBitmap(src, srcRect, dstRect, paint);
+	}
+
+	/*
+	 * ndkfile.cのためのユーティリティ
+	 */
+
+	/** Assetのファイルの内容を取得します。 */
+	private byte[] getFileContent(String fileName) {
+		byte[] buf = null;
+		try {
+			InputStream is = getAssets().open(fileName);
+			buf = new byte[is.available()];
+			is.read(buf);
+			is.close();
+		} catch(IOException e) {
+			throw new RuntimeException("Can't read file " + fileName);
+		}
+		return buf;
 	}
 }
