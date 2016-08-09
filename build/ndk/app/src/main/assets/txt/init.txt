@@ -1,4 +1,5 @@
 # ロゴ
 
 @bg roof.png 1.0
+@click
 

@@ -59,6 +59,9 @@ public class MainActivity extends Activity {
 	/** 転送先のRectです。 */
 	private Rect dstRect;
 
+	/** invalidateされたかを表します。 */
+	private boolean isInvalidated;
+
 	/**
 	 * アクティビティが作成されるときに呼ばれます。
 	 */
@@ -130,12 +133,13 @@ public class MainActivity extends Activity {
 
 					// JNIコードでフレームを処理する
 					if (!frame()) {
-						// 更新領域がない場合、タイマをセットする
-						sendEmptyMessageDelayed(0, DELAY);
-					} else {
-						// 更新領域がある場合、onDraw()で処理を継続する
-						view.invalidate();
+						// 終了する
+						finish();
 					}
+
+					// 更新領域がない場合、タイマをセットする
+					if (!isInvalidated)
+						sendEmptyMessageDelayed(0, DELAY);
 				}
 			};
 			handler.sendEmptyMessage(0);
@@ -157,6 +161,8 @@ public class MainActivity extends Activity {
 		 */
 		@Override
 		protected void onDraw(Canvas canvas) {
+			isInvalidated = false;
+
 			// 描画を行う
 			canvas.drawBitmap(backBitmap, srcRect, dstRect, paint);
 
@@ -187,6 +193,16 @@ public class MainActivity extends Activity {
 
 	/** フレーム処理を行います。 */
 	private native boolean frame();
+
+	/*
+	 * ndkmain.cのためのユーティリティ
+	 */
+
+	/** 再描画を行います。 */
+	private void invalidateView() {
+		isInvalidated = true;
+		view.invalidate();
+	}
 
 	/*
 	 * ndkimage.cのためのユーティリティ

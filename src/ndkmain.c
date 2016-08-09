@@ -61,6 +61,9 @@ Java_jp_luxion_suika_MainActivity_init(
 	/* テスト用のイメージを作成する */
 	fore_image = create_image_from_file("ch", "001-fun.png");
 
+	/* アプリケーション本体の初期化処理を行う */
+//	on_event_init();
+	
 	/* envをグローバル変数で参照するのを終了する */
 	jni_env = NULL;
 
@@ -78,10 +81,19 @@ Java_jp_luxion_suika_MainActivity_cleanup(
 	/* envをグローバル変数で参照する */
 	jni_env = env;
 
+	/* アプリケーション本体の終了処理を行う */
+//	on_event_cleanup();
+
+	/* コンフィグの終了処理を行う */
+	cleanup_conf();
+
+	/* 背景イメージの破棄を行う */
 	if (back_image != NULL) {
 		destroy_image(back_image);
 		back_image = NULL;
 	}
+
+	/* MainActivityの保持を終了する */
 	if (main_activity != NULL) {
 		(*env)->DeleteGlobalRef(env, main_activity);
 		main_activity = NULL;
@@ -99,23 +111,36 @@ Java_jp_luxion_suika_MainActivity_frame(
 	JNIEnv *env,
 	jobject instance)
 {
+	jclass cls;
+	jmethodID mid;
 	jboolean ret;
-	static int alpha = 0;
 
 	/* この関数呼び出しの間だけenvをグローバル変数で参照する */
 	jni_env = env;
 
 /*
-	if (!on_event_frame(&x, &y, &w, &h))
+	if (!on_event_frame(&x, &y, &w, &h)) {
 		ret = JNI_FALSE;
-	else
+	} else {
 		ret = JNI_TRUE;
+
+		// 再描画を行う
+		cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+		mid = (*jni_env)->GetMethodID(jni_env, cls, "invalidateView", "()V");
+		(*jni_env)->CallVoidMethod(jni_env, cls, mid);
+	}
 */
 
+	static int alpha = 0;
 	clear_image_color(back_image, 0xff0000ff);
-	draw_image(back_image, 0, 0, fore_image, get_image_width(fore_image),
-		   get_image_height(fore_image), 0, 0, alpha, BLEND_NORMAL);
+	draw_image(back_image, 0, 0, fore_image, get_image_width(fore_image), get_image_height(fore_image), 0, 0, alpha, BLEND_NORMAL);
 	alpha = (alpha + 1) % 256;
+
+	/* 再描画を行う */
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "invalidateView", "()V");
+	(*jni_env)->CallVoidMethod(jni_env, main_activity, mid);
+	ret = JNI_TRUE;
 
 	/* envをグローバル変数で参照するのを終了する */
 	jni_env = NULL;
