@@ -19,6 +19,7 @@ ln -sf ../../../../../../src/vars.h app/src/main/jni/
 ln -sf ../../../../../../src/wave.h app/src/main/jni/
 
 ln -sf ../../../../../../src/log.c app/src/main/jni/
+ln -sf ../../../../../../src/conf.c app/src/main/jni/
 
 ln -sf ../../../../../../src/ndkfile.c app/src/main/jni/
 ln -sf ../../../../../../src/ndkimage.c app/src/main/jni/

@@ -12,6 +12,10 @@
 #include "suika.h"
 #include "ndkmain.h"
 
+#include <android/log.h>
+
+#define LOG_BUF_SIZE	(1024)
+
 /*
  * JNI関数呼び出しの間だけ有効なJNIEnvへの参照
  */
@@ -45,6 +49,10 @@ Java_jp_luxion_suika_MainActivity_init(
 
 	/* この関数呼び出しの間だけenvをグローバル変数で参照する */
 	jni_env = env;
+
+	/* コンフィグの初期化処理を行う */
+	if (!init_conf())
+		return NULL;
 
 	/* 背景イメージを作成する */
 	back_image = create_image(1280, 720);
@@ -91,22 +99,28 @@ Java_jp_luxion_suika_MainActivity_frame(
 	JNIEnv *env,
 	jobject instance)
 {
+	jboolean ret;
 	static int alpha = 0;
 
 	/* この関数呼び出しの間だけenvをグローバル変数で参照する */
 	jni_env = env;
 
-	clear_image_color(back_image, 0xff0000ff);
+/*
+	if (!on_event_frame(&x, &y, &w, &h))
+		ret = JNI_FALSE;
+	else
+		ret = JNI_TRUE;
+*/
 
+	clear_image_color(back_image, 0xff0000ff);
 	draw_image(back_image, 0, 0, fore_image, get_image_width(fore_image),
 		   get_image_height(fore_image), 0, 0, alpha, BLEND_NORMAL);
-
 	alpha = (alpha + 1) % 256;
 
 	/* envをグローバル変数で参照するのを終了する */
 	jni_env = NULL;
 
-	return JNI_TRUE;
+	return ret;
 }
 
 /*
@@ -118,6 +132,13 @@ Java_jp_luxion_suika_MainActivity_frame(
  */
 bool log_info(const char *s, ...)
 {
+	char buf[LOG_BUF_SIZE];
+	va_list ap;
+
+	va_start(ap, s);
+	vsnprintf(buf, sizeof(buf), s, ap);
+	__android_log_print(ANDROID_LOG_INFO, "Suika", "%s", buf);
+	va_end(ap);
 	return true;
 }
 
@@ -126,6 +147,13 @@ bool log_info(const char *s, ...)
  */
 bool log_warn(const char *s, ...)
 {
+	char buf[LOG_BUF_SIZE];
+	va_list ap;
+
+	va_start(ap, s);
+	vsnprintf(buf, sizeof(buf), s, ap);
+	__android_log_print(ANDROID_LOG_WARN, "Suika", "%s", buf);
+	va_end(ap);
 	return true;
 }
 
@@ -134,6 +162,13 @@ bool log_warn(const char *s, ...)
  */
 bool log_error(const char *s, ...)
 {
+	char buf[LOG_BUF_SIZE];
+	va_list ap;
+
+	va_start(ap, s);
+	vsnprintf(buf, sizeof(buf), s, ap);
+	__android_log_print(ANDROID_LOG_ERROR, "Suika", "%s", buf);
+	va_end(ap);
 	return true;
 }
 

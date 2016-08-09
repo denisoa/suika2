@@ -235,7 +235,7 @@ public class MainActivity extends Activity {
 	private byte[] getFileContent(String fileName) {
 		byte[] buf = null;
 		try {
-			InputStream is = getAssets().open(fileName);
+			InputStream is = getResources().getAssets().open(fileName);
 			buf = new byte[is.available()];
 			is.read(buf);
 			is.close();
