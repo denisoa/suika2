@@ -1,5 +1,7 @@
 # ロゴ
 
-@bg roof.png 1.0
+@bg roof.png 2.0
+@ch c 001-fun.png 2.0
+@bg coast.png 2.0 curtain
 @click
 

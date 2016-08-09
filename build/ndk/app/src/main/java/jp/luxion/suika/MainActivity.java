@@ -19,6 +19,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -219,7 +220,8 @@ public class MainActivity extends Activity {
 			InputStream is = getResources().getAssets().open(fileName);
 			return BitmapFactory.decodeStream(is);
 		} catch (IOException e) {
-			throw new RuntimeException("Failed to load image " + fileName);
+			Log.e("Suika", "Failed to load image " + fileName);
+			return null;
 		}
 	}
 
@@ -256,7 +258,8 @@ public class MainActivity extends Activity {
 			is.read(buf);
 			is.close();
 		} catch(IOException e) {
-			throw new RuntimeException("Can't read file " + fileName);
+			Log.e("Suika", "Failed to read file " + fileName);
+			return null;
 		}
 		return buf;
 	}

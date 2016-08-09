@@ -82,6 +82,10 @@ struct image *create_image_from_file(const char *dir, const char *file)
 	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
 	mid = (*jni_env)->GetMethodID(jni_env, cls, "loadBitmap", "(Ljava/lang/String;)Landroid/graphics/Bitmap;");
 	img->bm = (*jni_env)->CallObjectMethod(jni_env, main_activity, mid, (*jni_env)->NewStringUTF(jni_env, buf));
+	if (img->bm == NULL) {
+		free(img);
+		return NULL;
+	}
 	img->bm = (*jni_env)->NewGlobalRef(jni_env, img->bm);
 
 	/* Bitmapの幅と高さを取得する */

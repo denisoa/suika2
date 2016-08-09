@@ -62,8 +62,8 @@ Java_jp_luxion_suika_MainActivity_init(
 	fore_image = create_image_from_file("ch", "001-fun.png");
 
 	/* アプリケーション本体の初期化処理を行う */
-//	on_event_init();
-	
+	on_event_init();
+
 	/* envをグローバル変数で参照するのを終了する */
 	jni_env = NULL;
 
@@ -82,7 +82,7 @@ Java_jp_luxion_suika_MainActivity_cleanup(
 	jni_env = env;
 
 	/* アプリケーション本体の終了処理を行う */
-//	on_event_cleanup();
+	on_event_cleanup();
 
 	/* コンフィグの終了処理を行う */
 	cleanup_conf();
@@ -113,12 +113,12 @@ Java_jp_luxion_suika_MainActivity_frame(
 {
 	jclass cls;
 	jmethodID mid;
+	int x, y, w, h;
 	jboolean ret;
 
 	/* この関数呼び出しの間だけenvをグローバル変数で参照する */
 	jni_env = env;
 
-/*
 	if (!on_event_frame(&x, &y, &w, &h)) {
 		ret = JNI_FALSE;
 	} else {
@@ -127,21 +127,20 @@ Java_jp_luxion_suika_MainActivity_frame(
 		// 再描画を行う
 		cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
 		mid = (*jni_env)->GetMethodID(jni_env, cls, "invalidateView", "()V");
-		(*jni_env)->CallVoidMethod(jni_env, cls, mid);
+		(*jni_env)->CallVoidMethod(jni_env, main_activity, mid);
 	}
-*/
-
+/*
 	static int alpha = 0;
 	clear_image_color(back_image, 0xff0000ff);
 	draw_image(back_image, 0, 0, fore_image, get_image_width(fore_image), get_image_height(fore_image), 0, 0, alpha, BLEND_NORMAL);
 	alpha = (alpha + 1) % 256;
 
-	/* 再描画を行う */
+	// 再描画を行う
 	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
 	mid = (*jni_env)->GetMethodID(jni_env, cls, "invalidateView", "()V");
 	(*jni_env)->CallVoidMethod(jni_env, main_activity, mid);
 	ret = JNI_TRUE;
-
+*/
 	/* envをグローバル変数で参照するのを終了する */
 	jni_env = NULL;
 
@@ -234,7 +233,7 @@ void reset_stop_watch(stop_watch_t *t)
 
 	/* 現在の時刻を取得する */
 	cls = (*jni_env)->FindClass(jni_env, "java/lang/System");
-	mid = (*jni_env)->GetMethodID(jni_env, cls, "currentTimeMillis", "()J");
+	mid = (*jni_env)->GetStaticMethodID(jni_env, cls, "currentTimeMillis", "()J");
 	ret = (*jni_env)->CallStaticLongMethod(jni_env, cls, mid);
 
 	/* 時刻を格納する */
@@ -252,10 +251,10 @@ int get_stop_watch_lap(stop_watch_t *t)
 
 	/* 現在の時刻を取得する */
 	cls = (*jni_env)->FindClass(jni_env, "java/lang/System");
-	mid = (*jni_env)->GetMethodID(jni_env, cls, "currentTimeMillis", "()J");
+	mid = (*jni_env)->GetStaticMethodID(jni_env, cls, "currentTimeMillis", "()J");
 	ret = (*jni_env)->CallStaticLongMethod(jni_env, cls, mid);
 
-	return (int)(ret - (long)t);
+	return (int)(ret - (long)*t);
 }
 
 /*
