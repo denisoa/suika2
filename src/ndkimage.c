@@ -17,7 +17,7 @@
  *  2016-08-05 Android NDK対応
  */
 
-#include "image.h"
+#include "suika.h"
 #include "ndkmain.h"
 
 #include <stdio.h>

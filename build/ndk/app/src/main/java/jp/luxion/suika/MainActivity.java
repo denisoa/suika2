@@ -9,11 +9,9 @@ package jp.luxion.suika;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
@@ -27,48 +25,79 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 public class MainActivity extends Activity {
 	static {
 		System.loadLibrary("suika");
 	}
 
-	/** 仮想ビューポートの幅です。 */
+	/**
+	 * 仮想ビューポートの幅です。
+	 */
 	private static final int VIEWPORT_WIDTH = 1280;
 
-	/** 仮想ビューポートの高さです。 */
+	/**
+	 * 仮想ビューポートの高さです。
+	 */
 	private static final int VIEWPORT_HEIGHT = 720;
 
-	/** 60fpsを実現するための待ち時間です。 */
+	/**
+	 * 60fpsを実現するための待ち時間です。
+	 */
 	private static final int DELAY = 0;
 
-	/** Viewです。 */
+	/**
+	 * タッチをホールドと判断する時間[ms]です。
+	 */
+	private static final int HOLD_TIME = 2000;
+
+	/**
+	 * Viewです。
+	 */
 	private MainView view;
 
-	/** フレームを処理するためのHandlerです。 */
+	/**
+	 * フレームを処理するためのHandlerです。
+	 */
 	private Handler handler;
 
-	/** 背景ビットマップです。 */
+	/**
+	 * 背景ビットマップです。
+	 */
 	private Bitmap backBitmap;
 
-	/** ビューポートサイズを1としたときの、レンダリング先の拡大率です。 */
+	/**
+	 * ビューポートサイズを1としたときの、レンダリング先の拡大率です。
+	 */
 	private float scale;
 
-	/** レンダリング先のXオフセットです。 */
+	/**
+	 * レンダリング先のXオフセットです。
+	 */
 	private int offsetX;
 
-	/** レンダリング先のXオフセットです。 */
+	/**
+	 * レンダリング先のXオフセットです。
+	 */
 	private int offsetY;
 
-	/** レンダリング先の幅です。 */
+	/**
+	 * レンダリング先の幅です。
+	 */
 	private int width;
 
-	/** レンダリング先の高さです。 */
+	/**
+	 * レンダリング先の高さです。
+	 */
 	private int height;
 
-	/** invalidateされたかを表します。 */
+	/**
+	 * invalidateされたかを表します。
+	 */
 	private boolean isInvalidated;
 
 	/**
@@ -84,7 +113,7 @@ public class MainActivity extends Activity {
 
 		// JNIコードで初期化処理を実行する
 		backBitmap = init();
-		if(backBitmap == null)
+		if (backBitmap == null)
 			throw new RuntimeException("onCreate() returned false");
 
 		// ビューを作成してセットする
@@ -95,13 +124,14 @@ public class MainActivity extends Activity {
 	/**
 	 * ビューです。
 	 */
-	private class MainView extends View {
+	private class MainView extends View implements View.OnTouchListener {
 		/**
 		 * コンストラクタです。
 		 */
 		public MainView(Context context) {
 			super(context);
 			setFocusable(true);
+			setOnTouchListener(this);
 		}
 
 		/**
@@ -110,13 +140,13 @@ public class MainActivity extends Activity {
 		@Override
 		protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 			// ビューポートの拡大率を求める
-			float scaleX = (float)w / VIEWPORT_WIDTH;
-			float scaleY = (float)h / VIEWPORT_HEIGHT;
+			float scaleX = (float) w / VIEWPORT_WIDTH;
+			float scaleY = (float) h / VIEWPORT_HEIGHT;
 			scale = scaleX > scaleY ? scaleY : scaleX;
 
 			// 実際に描画する領域のサイズを求める
-			width = (int)(VIEWPORT_WIDTH * scale);
-			height = (int)(VIEWPORT_HEIGHT * scale);
+			width = (int) (VIEWPORT_WIDTH * scale);
+			height = (int) (VIEWPORT_HEIGHT * scale);
 
 			// 実際に描画する領域のオフセットを求める
 			offsetX = (w - width) / 2;
@@ -182,17 +212,23 @@ public class MainActivity extends Activity {
 		 * タッチされた際に呼ばれます。
 		 */
 		@Override
-		public boolean onTouchEvent(MotionEvent event) {
-			if (event.getAction() != MotionEvent.ACTION_DOWN)
-				return false;
+		public boolean onTouch(View v, MotionEvent event) {
+			int x = (int) (event.getX() / scale);
+			int y = (int) (event.getY() / scale);
 
-			int x = (int)(event.getX() / scale);
-			int y = (int)(event.getY() / scale);
-
-			// タッチを処理する
-			touch(x, y);
-			Log.i("Suika", "onTouchEvent()");
-
+			switch (event.getAction() & MotionEvent.ACTION_MASK) {
+				case MotionEvent.ACTION_DOWN:
+				case MotionEvent.ACTION_MOVE:
+				case MotionEvent.ACTION_CANCEL:
+					touchMove(x, y);
+					break;
+				case MotionEvent.ACTION_UP:
+					if (event.getEventTime() - event.getDownTime() >= HOLD_TIME)
+						touchHold(x, y);
+					else
+						touchUp(x, y);
+					break;
+			}
 			return true;
 		}
 	}
@@ -201,23 +237,43 @@ public class MainActivity extends Activity {
 	 * ネイティブメソッド
 	 */
 
-	/** 初期化処理を行います。 */
+	/**
+	 * 初期化処理を行います。
+	 */
 	private native Bitmap init();
 
-	/** 終了処理を行います。 */
+	/**
+	 * 終了処理を行います。
+	 */
 	private native void cleanup();
 
-	/** フレーム処理を行います。 */
+	/**
+	 * フレーム処理を行います。
+	 */
 	private native boolean frame();
 
-	/** タッチを処理します。 */
-	private native void touch(int x, int y);
+	/**
+	 * タッチ(解放)を処理します。
+	 */
+	private native void touchUp(int x, int y);
+
+	/**
+	 * タッチ(ホールド)を処理します。
+	 */
+	private native void touchHold(int x, int y);
+
+	/**
+	 * タッチ(移動)を処理します。
+	 */
+	private native void touchMove(int x, int y);
 
 	/*
 	 * ndkmain.cのためのユーティリティ
 	 */
 
-	/** 再描画を行います。 */
+	/**
+	 * 再描画を行います。
+	 */
 	private void invalidateView() {
 		isInvalidated = true;
 		view.invalidate();
@@ -227,12 +283,16 @@ public class MainActivity extends Activity {
 	 * ndkimage.cのためのユーティリティ
 	 */
 
-	/** ビットマップを作成します。 */
+	/**
+	 * ビットマップを作成します。
+	 */
 	private Bitmap createBitmap(int w, int h) {
 		return Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
 	}
 
-	/** assetからビットマップを作成します。 */
+	/**
+	 * assetからビットマップを作成します。
+	 */
 	private Bitmap loadBitmap(String fileName) {
 		try {
 			InputStream is = getResources().getAssets().open(fileName);
@@ -243,7 +303,9 @@ public class MainActivity extends Activity {
 		}
 	}
 
-	/** Bitmapに矩形を描画します。 */
+	/**
+	 * Bitmapに矩形を描画します。
+	 */
 	private void drawRect(Bitmap bm, int x, int y, int w, int h, int color) {
 		Canvas canvas = new Canvas(bm);
 		Paint paint = new Paint();
@@ -253,7 +315,9 @@ public class MainActivity extends Activity {
 		canvas.drawRect(rect, paint);
 	}
 
-	/** BitmapにBitmapを描画します。 */
+	/**
+	 * BitmapにBitmapを描画します。
+	 */
 	private void drawBitmapAlpha(Bitmap dst, int dx, int dy, Bitmap src, int w, int h, int sx, int sy, int alpha) {
 		Canvas canvas = new Canvas(dst);
 		Rect dstRect = new Rect(dx, dy, dx + w, dy + h);
@@ -263,7 +327,9 @@ public class MainActivity extends Activity {
 		canvas.drawBitmap(src, srcRect, dstRect, paint);
 	}
 
-	/** BitmapにBitmapを描画します。 */
+	/**
+	 * BitmapにBitmapを描画します。
+	 */
 	private void drawBitmapCopy(Bitmap dst, int dx, int dy, Bitmap src, int w, int h, int sx, int sy) {
 		Canvas canvas = new Canvas(dst);
 		Rect dstRect = new Rect(dx, dy, dx + w, dy + h);
@@ -278,7 +344,9 @@ public class MainActivity extends Activity {
 	 * ndkfile.cのためのユーティリティ
 	 */
 
-	/** Assetのファイルの内容を取得します。 */
+	/**
+	 * Assetのファイルの内容を取得します。
+	 */
 	private byte[] getFileContent(String fileName) {
 		byte[] buf = null;
 		try {
@@ -286,7 +354,7 @@ public class MainActivity extends Activity {
 			buf = new byte[is.available()];
 			is.read(buf);
 			is.close();
-		} catch(IOException e) {
+		} catch (IOException e) {
 			Log.e("Suika", "Failed to read file " + fileName);
 			return null;
 		}
@@ -309,7 +377,6 @@ public class MainActivity extends Activity {
 		paint.setAntiAlias(true);
 		Paint.FontMetrics fontMetrics = paint.getFontMetrics();
 		canvas.drawText(s, x, y - fontMetrics.ascent, paint);
-//		canvas.drawText(s, 100, 100, paint);
 		return (int)paint.measureText(s);
 	}
 

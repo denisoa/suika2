@@ -124,18 +124,7 @@ Java_jp_luxion_suika_MainActivity_frame(
 		mid = (*jni_env)->GetMethodID(jni_env, cls, "invalidateView", "()V");
 		(*jni_env)->CallVoidMethod(jni_env, main_activity, mid);
 	}
-/*
-	static int alpha = 0;
-	clear_image_color(back_image, 0xff0000ff);
-	draw_image(back_image, 0, 0, fore_image, get_image_width(fore_image), get_image_height(fore_image), 0, 0, alpha, BLEND_NORMAL);
-	alpha = (alpha + 1) % 256;
 
-	// 再描画を行う
-	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
-	mid = (*jni_env)->GetMethodID(jni_env, cls, "invalidateView", "()V");
-	(*jni_env)->CallVoidMethod(jni_env, main_activity, mid);
-	ret = JNI_TRUE;
-*/
 	/* envをグローバル変数で参照するのを終了する */
 	jni_env = NULL;
 
@@ -143,10 +132,10 @@ Java_jp_luxion_suika_MainActivity_frame(
 }
 
 /*
- * タッチを処理します。
+ * タッチ(解放)を処理します。
  */
 JNIEXPORT void JNICALL
-Java_jp_luxion_suika_MainActivity_touch(
+Java_jp_luxion_suika_MainActivity_touchUp(
 	JNIEnv *env,
 	jobject instance,
 	jint x,
@@ -155,6 +144,35 @@ Java_jp_luxion_suika_MainActivity_touch(
 	mouse_pos_x = (int)x;
 	mouse_pos_y = (int)y;
 	is_left_button_pressed = true;
+}
+
+/*
+ * タッチ(ホールド)を処理します。
+ */
+JNIEXPORT void JNICALL
+Java_jp_luxion_suika_MainActivity_touchHold(
+	JNIEnv *env,
+	jobject instance,
+	jint x,
+	jint y)
+{
+	mouse_pos_x = (int)x;
+	mouse_pos_y = (int)y;
+	is_right_button_pressed = true;
+}
+
+/*
+ * タッチ(移動)を処理します。
+ */
+JNIEXPORT void JNICALL
+Java_jp_luxion_suika_MainActivity_touchMove(
+	JNIEnv *env,
+	jobject instance,
+	jint x,
+	jint y)
+{
+	mouse_pos_x = (int)x;
+	mouse_pos_y = (int)y;
 }
 
 /*
