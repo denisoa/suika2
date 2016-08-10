@@ -31,8 +31,6 @@ jobject main_activity;
  */
 static struct image *back_image;
 
-static struct image *fore_image;
-
 /*
  * 初期化処理を行います。
  */
@@ -57,9 +55,6 @@ Java_jp_luxion_suika_MainActivity_init(
 	/* 背景イメージを作成する */
 	back_image = create_image(1280, 720);
 	back_bitmap = (jobject)get_image_object(back_image);
-
-	/* テスト用のイメージを作成する */
-	fore_image = create_image_from_file("ch", "001-fun.png");
 
 	/* アプリケーション本体の初期化処理を行う */
 	on_event_init();
@@ -145,6 +140,21 @@ Java_jp_luxion_suika_MainActivity_frame(
 	jni_env = NULL;
 
 	return ret;
+}
+
+/*
+ * タッチを処理します。
+ */
+JNIEXPORT void JNICALL
+Java_jp_luxion_suika_MainActivity_touch(
+	JNIEnv *env,
+	jobject instance,
+	jint x,
+	jint y)
+{
+	mouse_pos_x = (int)x;
+	mouse_pos_y = (int)y;
+	is_left_button_pressed = true;
 }
 
 /*

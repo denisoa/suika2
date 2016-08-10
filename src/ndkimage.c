@@ -199,8 +199,15 @@ void draw_image(struct image * RESTRICT dst_image, int dst_left, int dst_top,
 	jclass cls;
 	jmethodID mid;
 
-	/* 矩形を描画する */
-	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
-	mid = (*jni_env)->GetMethodID(jni_env, cls, "drawBitmap", "(Landroid/graphics/Bitmap;IILandroid/graphics/Bitmap;IIIII)V");
-	(*jni_env)->CallVoidMethod(jni_env, main_activity, mid, dst_image->bm, dst_left, dst_top, src_image->bm, width, height, src_left, src_top, alpha);
+	if (bt == BLEND_FAST) {
+		cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+		mid = (*jni_env)->GetMethodID(jni_env, cls, "drawBitmapAlpha", "(Landroid/graphics/Bitmap;IILandroid/graphics/Bitmap;IIIII)V");
+		(*jni_env)->CallVoidMethod(jni_env, main_activity, mid, dst_image->bm, dst_left, dst_top, src_image->bm, width, height, src_left, src_top, alpha);
+	} else if (bt == BLEND_NONE) {
+		cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+		mid = (*jni_env)->GetMethodID(jni_env, cls, "drawBitmapCopy", "(Landroid/graphics/Bitmap;IILandroid/graphics/Bitmap;IIII)V");
+		(*jni_env)->CallVoidMethod(jni_env, main_activity, mid, dst_image->bm, dst_left, dst_top, src_image->bm, width, height, src_left, src_top);
+	} else {
+		assert(0);
+	}
 }

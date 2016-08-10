@@ -15,6 +15,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
@@ -51,14 +53,20 @@ public class MainActivity extends Activity {
 	/** 背景ビットマップです。 */
 	private Bitmap backBitmap;
 
-	/** Paintです。 */
-	private Paint paint;
+	/** ビューポートサイズを1としたときの、レンダリング先の拡大率です。 */
+	private float scale;
 
-	/** 転送元のRectです。 */
-	private Rect srcRect;
+	/** レンダリング先のXオフセットです。 */
+	private int offsetX;
 
-	/** 転送先のRectです。 */
-	private Rect dstRect;
+	/** レンダリング先のXオフセットです。 */
+	private int offsetY;
+
+	/** レンダリング先の幅です。 */
+	private int width;
+
+	/** レンダリング先の高さです。 */
+	private int height;
 
 	/** invalidateされたかを表します。 */
 	private boolean isInvalidated;
@@ -104,21 +112,15 @@ public class MainActivity extends Activity {
 			// ビューポートの拡大率を求める
 			float scaleX = (float)w / VIEWPORT_WIDTH;
 			float scaleY = (float)h / VIEWPORT_HEIGHT;
-			float scale = scaleX > scaleY ? scaleY : scaleX;
+			scale = scaleX > scaleY ? scaleY : scaleX;
 
 			// 実際に描画する領域のサイズを求める
-			int width = (int)(VIEWPORT_WIDTH * scale);
-			int height = (int)(VIEWPORT_HEIGHT * scale);
+			width = (int)(VIEWPORT_WIDTH * scale);
+			height = (int)(VIEWPORT_HEIGHT * scale);
 
 			// 実際に描画する領域のオフセットを求める
-			int offsetX = (w - width) / 2;
-			int offsetY = (h - height) / 2;
-
-			// 描画用のオブジェクトを作成する
-			paint = new Paint();
-			srcRect = new Rect(0, 0, VIEWPORT_WIDTH - 1, VIEWPORT_HEIGHT - 1);
-			dstRect = new Rect(offsetX, offsetY, offsetX + width - 1,
-							   offsetY + height - 1);
+			offsetX = (w - width) / 2;
+			offsetY = (h - height) / 2;
 		}
 
 		/**
@@ -136,11 +138,11 @@ public class MainActivity extends Activity {
 					if (!frame()) {
 						// 終了する
 						finish();
+					} else {
+						// 更新領域がない場合、タイマをセットする
+						if (!isInvalidated)
+							sendEmptyMessageDelayed(0, DELAY);
 					}
-
-					// 更新領域がない場合、タイマをセットする
-					if (!isInvalidated)
-						sendEmptyMessageDelayed(0, DELAY);
 				}
 			};
 			handler.sendEmptyMessage(0);
@@ -154,17 +156,22 @@ public class MainActivity extends Activity {
 		protected void onDetachedFromWindow() {
 			handler = null;
 			super.onDetachedFromWindow();
+
+			// 終了処理を行う
 			cleanup();
 		}
 
 		/**
-		 * フレーム処理の後半で、実際の描画を行う際に呼ばれます。
+		 * ビューへの描画を行う際に呼ばれます。
 		 */
 		@Override
 		protected void onDraw(Canvas canvas) {
 			isInvalidated = false;
 
 			// 描画を行う
+			Paint paint = new Paint();
+			Rect srcRect = new Rect(0, 0, VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+			Rect dstRect = new Rect(offsetX, offsetY, offsetX + width, offsetY + height);
 			canvas.drawBitmap(backBitmap, srcRect, dstRect, paint);
 
 			// フレーム処理時刻を更新する
@@ -176,8 +183,16 @@ public class MainActivity extends Activity {
 		 */
 		@Override
 		public boolean onTouchEvent(MotionEvent event) {
-			float x = event.getX();
-			float y = event.getY();
+			if (event.getAction() != MotionEvent.ACTION_DOWN)
+				return false;
+
+			int x = (int)(event.getX() / scale);
+			int y = (int)(event.getY() / scale);
+
+			// タッチを処理する
+			touch(x, y);
+			Log.i("Suika", "onTouchEvent()");
+
 			return true;
 		}
 	}
@@ -194,6 +209,9 @@ public class MainActivity extends Activity {
 
 	/** フレーム処理を行います。 */
 	private native boolean frame();
+
+	/** タッチを処理します。 */
+	private native void touch(int x, int y);
 
 	/*
 	 * ndkmain.cのためのユーティリティ
@@ -229,19 +247,30 @@ public class MainActivity extends Activity {
 	private void drawRect(Bitmap bm, int x, int y, int w, int h, int color) {
 		Canvas canvas = new Canvas(bm);
 		Paint paint = new Paint();
-		Rect rect = new Rect(x, y, x+w-1, y+h-1);
+		Rect rect = new Rect(x, y, x + w, y + h);
 		paint.setColor(color);
 		paint.setStyle(Paint.Style.FILL);
 		canvas.drawRect(rect, paint);
 	}
 
 	/** BitmapにBitmapを描画します。 */
-	private void drawBitmap(Bitmap dst, int dx, int dy, Bitmap src, int w, int h, int sx, int sy, int alpha) {
+	private void drawBitmapAlpha(Bitmap dst, int dx, int dy, Bitmap src, int w, int h, int sx, int sy, int alpha) {
 		Canvas canvas = new Canvas(dst);
-		Rect dstRect = new Rect(dx, dy, dx+w-1, dy+h-1);
-		Rect srcRect = new Rect(sx, sy, sx+w-1, sy+h-1);
+		Rect dstRect = new Rect(dx, dy, dx + w, dy + h);
+		Rect srcRect = new Rect(sx, sy, sx + w, sy + h);
 		Paint paint = new Paint();
 		paint.setAlpha(alpha);
+		canvas.drawBitmap(src, srcRect, dstRect, paint);
+	}
+
+	/** BitmapにBitmapを描画します。 */
+	private void drawBitmapCopy(Bitmap dst, int dx, int dy, Bitmap src, int w, int h, int sx, int sy) {
+		Canvas canvas = new Canvas(dst);
+		Rect dstRect = new Rect(dx, dy, dx + w, dy + h);
+		Rect srcRect = new Rect(sx, sy, sx + w, sy + h);
+		Paint paint = new Paint();
+		paint.setAlpha(255);
+		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
 		canvas.drawBitmap(src, srcRect, dstRect, paint);
 	}
 
@@ -262,5 +291,43 @@ public class MainActivity extends Activity {
 			return null;
 		}
 		return buf;
+	}
+
+	/*
+	 * ndkglyph.cのためのユーティリティ
+	 */
+
+	/** Bitmapに文字を描画します。 */
+	private int drawGlyph(Bitmap bm, int x, int y, int size, int color, int codepoint) {
+		String s = "" + (char)codepoint;
+		Canvas canvas = new Canvas(bm);
+		Paint paint = new Paint();
+		paint.setTextSize(size);
+		paint.setStyle(Paint.Style.FILL);
+		paint.setTextAlign(Paint.Align.LEFT);
+		paint.setColor(0xff000000 | color);
+		paint.setAntiAlias(true);
+		Paint.FontMetrics fontMetrics = paint.getFontMetrics();
+		canvas.drawText(s, x, y - fontMetrics.ascent, paint);
+//		canvas.drawText(s, 100, 100, paint);
+		return (int)paint.measureText(s);
+	}
+
+	/** 文字を描画したときの幅を取得します。 */
+	private int getGlyphWidth(int size, int codepoint) {
+		String s = "" + (char)codepoint;
+		Paint paint = new Paint();
+		paint.setTextSize(size);
+		paint.setAntiAlias(true);
+		return (int)paint.measureText(s);
+	}
+
+	/** 文字を描画したときの幅を取得します。 */
+	private int getGlyphHeight(int size, int codepoint) {
+		Paint paint = new Paint();
+		paint.setTextSize(size);
+		paint.setAntiAlias(true);
+		Paint.FontMetrics fontMetrics = paint.getFontMetrics();
+		return (int)(-fontMetrics.ascent + fontMetrics.descent);
 	}
 }
