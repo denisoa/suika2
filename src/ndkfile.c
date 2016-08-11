@@ -27,7 +27,7 @@ struct rfile {
 
 /* ファイル書き込みストリーム */
 struct wfile {
-	FILE *fp;
+	jobject os;
 };
 
 /*
@@ -91,8 +91,8 @@ struct rfile *open_rfile(const char *dir, const char *file, bool save_data)
 
 	/* rfile構造体の中身をセットする */
 	rf->array = (jbyteArray)(*jni_env)->NewGlobalRef(jni_env, ret);
-	rf->buf = (*jni_env)->GetByteArrayElements(jni_env, rf->array, NULL);
-	rf->size = (*jni_env)->GetArrayLength(jni_env, rf->array);
+	rf->buf = (char *)(*jni_env)->GetByteArrayElements(jni_env, rf->array, NULL);
+	rf->size = (uint64_t)(*jni_env)->GetArrayLength(jni_env, rf->array);
 	rf->pos = 0;
 
 	return rf;
@@ -189,11 +189,12 @@ void close_rfile(struct rfile *rf)
  */
 struct wfile *open_wfile(const char *dir, const char *file)
 {
-	char path[PATH_SIZE];
 	struct wfile *wf;
+	jclass cls;
+	jmethodID mid;
+	jobject ret;
 
-	/* パスを生成する */
-	snprintf(path, sizeof(path), "%s/%s", dir, file);
+	assert(strcmp(dir, SAVE_DIR) == 0);
 
 	/* wfile構造体のメモリを確保する */
 	wf = malloc(sizeof(struct wfile));
@@ -203,12 +204,15 @@ struct wfile *open_wfile(const char *dir, const char *file)
 	}
 
 	/* ファイルをオープンする */
-	wf->fp = fopen(path, "wb");
-	if (wf->fp == NULL) {
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "openSaveFile", "(Ljava/lang/String;)Ljava/io/OutputStream;");
+	ret = (*jni_env)->CallObjectMethod(jni_env, main_activity, mid, (*jni_env)->NewStringUTF(jni_env, file));
+	if (ret == NULL) {
 		log_dir_file_open(dir, file);
 		free(wf);
 		return NULL;
 	}
+	wf->os = (*jni_env)->NewGlobalRef(jni_env, ret);
 
 	return wf;
 }
@@ -218,14 +222,26 @@ struct wfile *open_wfile(const char *dir, const char *file)
  */
 size_t write_wfile(struct wfile *wf, const void *buf, size_t size)
 {
-	size_t len;
+	jclass cls;
+	jmethodID mid;
+	jboolean ret;
+	size_t i;
+	int c;
 
-	assert(wf != NULL);
-	assert(wf->fp != NULL);
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "writeSaveFile", "(Ljava/io/OutputStream;I)Z");
 
-	len = fwrite(buf, 1, size, wf->fp);
+	for (i = 0; i < size; i++) {
+		c = (unsigned char)*((char *)buf + i);
+		ret = (*jni_env)->CallBooleanMethod(jni_env, main_activity, mid, wf->os, c);
+		if (ret != JNI_TRUE)
+			return i;
+	}
 
-	return len;
+	/* 解放しないとlocal reference tableが溢れる */
+	(*jni_env)->DeleteLocalRef(jni_env, cls);
+
+	return i;
 }
 
 /*
@@ -233,10 +249,14 @@ size_t write_wfile(struct wfile *wf, const void *buf, size_t size)
  */
 void close_wfile(struct wfile *wf)
 {
-	assert(wf != NULL);
-	assert(wf->fp != NULL);
+	jclass cls;
+	jmethodID mid;
 
-	fflush(wf->fp);
-	fclose(wf->fp);
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "closeSaveFile", "(Ljava/io/OutputStream;)V");
+	(*jni_env)->CallVoidMethod(jni_env, main_activity, mid, wf->os);
+	
+	(*jni_env)->DeleteGlobalRef(jni_env, wf->os);
+
 	free(wf);
 }

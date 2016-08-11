@@ -14,7 +14,8 @@
 
 #include <android/log.h>
 
-#define LOG_BUF_SIZE	(1024)
+#define LOG_BUF_SIZE		(1024)
+#define SCROLL_DOWN_MARGIN	(5)
 
 /*
  * JNI関数呼び出しの間だけ有効なJNIEnvへの参照
@@ -132,6 +133,20 @@ Java_jp_luxion_suika_MainActivity_frame(
 }
 
 /*
+ * タッチ(移動)を処理します。
+ */
+JNIEXPORT void JNICALL
+Java_jp_luxion_suika_MainActivity_touchMove(
+	JNIEnv *env,
+	jobject instance,
+	jint x,
+	jint y)
+{
+	mouse_pos_x = (int)x;
+	mouse_pos_y = (int)y;
+}
+
+/*
  * タッチ(解放)を処理します。
  */
 JNIEXPORT void JNICALL
@@ -162,17 +177,26 @@ Java_jp_luxion_suika_MainActivity_touchHold(
 }
 
 /*
- * タッチ(移動)を処理します。
+ * タッチ(スクロール)を処理します。
  */
 JNIEXPORT void JNICALL
-Java_jp_luxion_suika_MainActivity_touchMove(
+Java_jp_luxion_suika_MainActivity_touchScroll(
 	JNIEnv *env,
 	jobject instance,
 	jint x,
 	jint y)
 {
+	int dy;
+
+	dy = y - mouse_pos_y;
+
 	mouse_pos_x = (int)x;
 	mouse_pos_y = (int)y;
+
+	if (dy < 0)
+		is_up_pressed = true;
+	else if (dy > SCROLL_DOWN_MARGIN)
+		is_down_pressed = true;
 }
 
 /*

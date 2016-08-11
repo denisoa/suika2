@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,70 +36,50 @@ public class MainActivity extends Activity {
 		System.loadLibrary("suika");
 	}
 
-	/**
-	 * 仮想ビューポートの幅です。
-	 */
+	/** 仮想ビューポートの幅です。 */
 	private static final int VIEWPORT_WIDTH = 1280;
 
-	/**
-	 * 仮想ビューポートの高さです。
-	 */
+	/** 仮想ビューポートの高さです。 */
 	private static final int VIEWPORT_HEIGHT = 720;
 
-	/**
-	 * 60fpsを実現するための待ち時間です。
-	 */
+	/** 60fpsを実現するための待ち時間です。 */
 	private static final int DELAY = 0;
 
-	/**
-	 * タッチをホールドと判断する時間[ms]です。
-	 */
-	private static final int HOLD_TIME = 2000;
+	/** タッチをホールドと判断する時間[ms]です */
+	private static final int HOLD_TIME_MIN = 200;
 
-	/**
-	 * Viewです。
-	 */
+	/** タッチをホールドと判断する時間[ms]です */
+	private static final int HOLD_TIME_MAX = 1000;
+
+	/** Viewです。 */
 	private MainView view;
 
-	/**
-	 * フレームを処理するためのHandlerです。
-	 */
+	/** フレームを処理するためのHandlerです。 */
 	private Handler handler;
 
-	/**
-	 * 背景ビットマップです。
-	 */
+	/** 背景ビットマップです。 */
 	private Bitmap backBitmap;
 
-	/**
-	 * ビューポートサイズを1としたときの、レンダリング先の拡大率です。
-	 */
+	/** ビューポートサイズを1としたときの、レンダリング先の拡大率です。 */
 	private float scale;
 
-	/**
-	 * レンダリング先のXオフセットです。
-	 */
+	/** レンダリング先のXオフセットです。 */
 	private int offsetX;
 
-	/**
-	 * レンダリング先のXオフセットです。
-	 */
+	/** レンダリング先のXオフセットです。 */
 	private int offsetY;
 
-	/**
-	 * レンダリング先の幅です。
-	 */
+	/** レンダリング先の幅です。 */
 	private int width;
 
-	/**
-	 * レンダリング先の高さです。
-	 */
+	/** レンダリング先の高さです。 */
 	private int height;
 
-	/**
-	 * invalidateされたかを表します。
-	 */
+	/** invalidateされたかを表します。 */
 	private boolean isInvalidated;
+
+	/** 前回タッチされていた箇所の数です。 */
+	private int lastPointedCount;
 
 	/**
 	 * アクティビティが作成されるときに呼ばれます。
@@ -215,20 +196,35 @@ public class MainActivity extends Activity {
 		public boolean onTouch(View v, MotionEvent event) {
 			int x = (int) (event.getX() / scale);
 			int y = (int) (event.getY() / scale);
+			int pointed = event.getPointerCount();
+			long hold = event.getEventTime() - event.getDownTime();
 
-			switch (event.getAction() & MotionEvent.ACTION_MASK) {
-				case MotionEvent.ACTION_DOWN:
-				case MotionEvent.ACTION_MOVE:
-				case MotionEvent.ACTION_CANCEL:
+			switch(event.getActionMasked()) {
+			case MotionEvent.ACTION_MOVE:
+//			case MotionEvent.ACTION_DOWN:
+//			case MotionEvent.ACTION_CANCEL:
+				if(pointed == 1) {
+					Log.i("Suika", "touchMove");
 					touchMove(x, y);
-					break;
-				case MotionEvent.ACTION_UP:
-					if (event.getEventTime() - event.getDownTime() >= HOLD_TIME)
+				} else {
+					Log.i("Suika", "touchScroll " + y);
+					touchScroll(x, y);
+				}
+				break;
+			case MotionEvent.ACTION_UP:
+				if(lastPointedCount == 1) {
+					if(hold >= HOLD_TIME_MIN && hold <= HOLD_TIME_MAX) {
+						Log.i("Suika", "touchHold");
 						touchHold(x, y);
-					else
+					} else {
+						Log.i("Suika", "touchUp");
 						touchUp(x, y);
-					break;
+					}
+				}
+				break;
 			}
+
+			lastPointedCount = pointed;
 			return true;
 		}
 	}
@@ -253,6 +249,11 @@ public class MainActivity extends Activity {
 	private native boolean frame();
 
 	/**
+	 * タッチ(移動)を処理します。
+	 */
+	private native void touchMove(int x, int y);
+
+	/**
 	 * タッチ(解放)を処理します。
 	 */
 	private native void touchUp(int x, int y);
@@ -263,9 +264,9 @@ public class MainActivity extends Activity {
 	private native void touchHold(int x, int y);
 
 	/**
-	 * タッチ(移動)を処理します。
+	 * タッチ(スクロール)を処理します。
 	 */
-	private native void touchMove(int x, int y);
+	private native void touchScroll(int x, int y);
 
 	/*
 	 * ndkmain.cのためのユーティリティ
@@ -312,6 +313,7 @@ public class MainActivity extends Activity {
 		Rect rect = new Rect(x, y, x + w, y + h);
 		paint.setColor(color);
 		paint.setStyle(Paint.Style.FILL);
+		paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
 		canvas.drawRect(rect, paint);
 	}
 
@@ -344,21 +346,70 @@ public class MainActivity extends Activity {
 	 * ndkfile.cのためのユーティリティ
 	 */
 
-	/**
-	 * Assetのファイルの内容を取得します。
-	 */
+	/** Assetあるいはセーブファイルの内容を取得します。 */
 	private byte[] getFileContent(String fileName) {
+		if (fileName.startsWith("sav/"))
+			return getSaveFileContent(fileName.split("/")[1]);
+		else
+			return getAssetFileContent(fileName);
+	}
+
+	/** Assetのファイルの内容を取得します。 */
+	private byte[] getAssetFileContent(String fileName) {
 		byte[] buf = null;
 		try {
 			InputStream is = getResources().getAssets().open(fileName);
 			buf = new byte[is.available()];
 			is.read(buf);
 			is.close();
-		} catch (IOException e) {
+		} catch(IOException e) {
 			Log.e("Suika", "Failed to read file " + fileName);
-			return null;
 		}
 		return buf;
+	}
+
+	/** セーブファイルの内容を取得します。 */
+	private byte[] getSaveFileContent(String fileName) {
+		byte[] buf = null;
+		try {
+			FileInputStream fis = openFileInput(fileName);
+			buf = new byte[fis.available()];
+			fis.read(buf);
+			fis.close();
+		} catch(IOException e) {
+		}
+		return buf;
+	}
+
+	/** セーブファイルの書き込みストリームをオープンします。 */
+	private OutputStream openSaveFile(String fileName) {
+		try {
+			FileOutputStream fos = openFileOutput(fileName, 0);
+			return fos;
+		} catch(IOException e) {
+			Log.e("Suika", "Failed to write file " + fileName);
+		}
+		return null;
+	}
+
+	/** セーブファイルにデータを書き込みます。 */
+	private boolean writeSaveFile(OutputStream os, int b) {
+		try {
+			os.write(b);
+			return true;
+		} catch(IOException e) {
+			Log.e("Suika", "Failed to write file.");
+		}
+		return false;
+	}
+
+	/** セーブファイルの書き込みストリームをクローズします。 */
+	private void closeSaveFile(OutputStream os) {
+		try {
+			os.close();
+		} catch(IOException e) {
+			Log.e("Suika", "Failed to write file.");
+		}
 	}
 
 	/*
