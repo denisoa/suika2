@@ -314,6 +314,19 @@ int get_stop_watch_lap(stop_watch_t *t)
  */
 bool play_sound(int n, struct wave *w)
 {
+	jclass cls;
+	jmethodID mid;
+	const char *file;
+	bool loop;
+
+	file = get_wave_file_name(w);
+	loop = is_wave_looped(w);
+
+	/* サウンドの再生を開始する */
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "playSound", "(ILjava/lang/String;Z)V");
+	(*jni_env)->CallVoidMethod(jni_env, main_activity, mid, n, (*jni_env)->NewStringUTF(jni_env, file), loop ? JNI_TRUE : JNI_FALSE);
+
 	return true;
 }
 
@@ -322,6 +335,14 @@ bool play_sound(int n, struct wave *w)
  */
 bool stop_sound(int n)
 {
+	jclass cls;
+	jmethodID mid;
+
+	/* サウンドの再生を停止する */
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "stopSound", "(I)V");
+	(*jni_env)->CallVoidMethod(jni_env, main_activity, mid, n);
+
 	return true;
 }
 
@@ -330,5 +351,13 @@ bool stop_sound(int n)
  */
 bool set_sound_volume(int n, float vol)
 {
+	jclass cls;
+	jmethodID mid;
+
+	/* サウンドの再生を停止する */
+	cls = (*jni_env)->FindClass(jni_env, "jp/luxion/suika/MainActivity");
+	mid = (*jni_env)->GetMethodID(jni_env, cls, "setVolume", "(IF)V");
+	(*jni_env)->CallVoidMethod(jni_env, main_activity, mid, n, vol);
+
 	return true;
 }

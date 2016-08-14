@@ -50,3 +50,20 @@ ln -sf ../../../../../../src/ndkimage.c app/src/main/jni/
 ln -sf ../../../../../../src/ndkmain.h app/src/main/jni/
 ln -sf ../../../../../../src/ndkmain.c app/src/main/jni/
 ln -sf ../../../../../../src/ndkwave.c app/src/main/jni/
+
+rm -r app/src/main/assets/bg
+ln -sf ../../../../../../suika2/bg app/src/main/assets/
+rm -r app/src/main/assets/bgm
+ln -sf ../../../../../../suika2/bgm app/src/main/assets/
+rm -r app/src/main/assets/cg
+ln -sf ../../../../../../suika2/cg app/src/main/assets/
+rm -r app/src/main/assets/ch
+ln -sf ../../../../../../suika2/ch app/src/main/assets/
+rm -r app/src/main/assets/conf
+ln -sf ../../../../../../suika2/conf app/src/main/assets/
+rm -r app/src/main/assets/cv
+ln -sf ../../../../../../suika2/cv app/src/main/assets/
+rm -r app/src/main/assets/se
+ln -sf ../../../../../../suika2/se app/src/main/assets/
+rm -r app/src/main/assets/txt
+ln -sf ../../../../../../suika2/txt app/src/main/assets/

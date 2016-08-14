@@ -9,6 +9,7 @@ package jp.luxion.suika;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -16,6 +17,7 @@ import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
@@ -51,6 +53,18 @@ public class MainActivity extends Activity {
 	/** タッチをホールドと判断する時間[ms]です */
 	private static final int HOLD_TIME_MAX = 1000;
 
+	/** ミキサのストリーム数です。 */
+	private static final int MIXER_STREAMS = 3;
+
+	/** ミキサのBGMストリームです。 */
+	private static final int BGM_STREAM = 0;
+
+	/** ミキサのVOICEストリームです。 */
+	private static final int VOICE_STREAM = 1;
+
+	/** ミキサのSEストリームです。 */
+	private static final int SE_STREAM = 2;
+
 	/** Viewです。 */
 	private MainView view;
 
@@ -81,6 +95,9 @@ public class MainActivity extends Activity {
 	/** 前回タッチされていた箇所の数です。 */
 	private int lastPointedCount;
 
+	/** BE/VOICE/SEのMediaPlayerです。 */
+	private MediaPlayer[] player = new MediaPlayer[MIXER_STREAMS];
+
 	/**
 	 * アクティビティが作成されるときに呼ばれます。
 	 */
@@ -92,14 +109,14 @@ public class MainActivity extends Activity {
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+		// ビューを作成してセットする
+		view = new MainView(this);
+		setContentView(view);
+
 		// JNIコードで初期化処理を実行する
 		backBitmap = init();
 		if (backBitmap == null)
 			throw new RuntimeException("onCreate() returned false");
-
-		// ビューを作成してセットする
-		view = new MainView(this);
-		setContentView(view);
 	}
 
 	/**
@@ -233,51 +250,75 @@ public class MainActivity extends Activity {
 	 * ネイティブメソッド
 	 */
 
-	/**
-	 * 初期化処理を行います。
-	 */
+	/** 初期化処理を行います。	*/
 	private native Bitmap init();
 
-	/**
-	 * 終了処理を行います。
-	 */
+	/** 終了処理を行います。 */
 	private native void cleanup();
 
-	/**
-	 * フレーム処理を行います。
-	 */
+	/** フレーム処理を行います。 */
 	private native boolean frame();
 
-	/**
-	 * タッチ(移動)を処理します。
-	 */
+	/** タッチ(移動)を処理します。 */
 	private native void touchMove(int x, int y);
 
-	/**
-	 * タッチ(解放)を処理します。
-	 */
+	/** タッチ(解放)を処理します。 */
 	private native void touchUp(int x, int y);
 
-	/**
-	 * タッチ(ホールド)を処理します。
-	 */
+	/** タッチ(ホールド)を処理します。 */
 	private native void touchHold(int x, int y);
 
-	/**
-	 * タッチ(スクロール)を処理します。
-	 */
+	/** タッチ(スクロール)を処理します。 */
 	private native void touchScroll(int x, int y);
 
 	/*
 	 * ndkmain.cのためのユーティリティ
 	 */
 
-	/**
-	 * 再描画を行います。
-	 */
+	/** 再描画を行います。 */
 	private void invalidateView() {
 		isInvalidated = true;
 		view.invalidate();
+	}
+
+	/** 音声の再生を開始します。 */
+	private void playSound(int stream, String fileName, boolean loop) {
+		assert stream > 0 && stream < MIXER_STREAMS;
+
+		stopSound(stream);
+
+		try {
+			AssetFileDescriptor afd = getAssets().openFd(fileName);
+			player[stream] = new MediaPlayer();
+			player[stream].setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+			player[stream].setLooping(loop);
+			player[stream].prepare();
+			player[stream].start();
+		} catch(IOException e) {
+			Log.e("Suika", "Failed to load sound " + fileName);
+			return;
+		}
+	}
+
+	/** 音声の再生を停止します。 */
+	private void stopSound(int stream) {
+		assert stream > 0 && stream < MIXER_STREAMS;
+
+		if(player[stream] != null) {
+			player[stream].stop();
+			player[stream].reset();
+			player[stream].release();
+			player[stream] = null;
+		}
+	}
+
+	/** 音量を設定します。 */
+	private void setVolume(int stream, float vol) {
+		assert stream > 0 && stream < MIXER_STREAMS;
+		assert vol >= 0.0f && vol <= 1.0f;
+
+		if(player[stream] != null)
+			player[stream].setVolume(vol, vol);
 	}
 
 	/*

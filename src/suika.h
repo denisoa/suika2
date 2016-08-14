@@ -39,14 +39,6 @@
 #include "wave.h"
 
 /*
- * ミキサのストリーム
- */
-#define MIXER_STREAMS	(3)
-#define BGM_STREAM	(0)
-#define VOICE_STREAM	(1)
-#define SE_STREAM	(2)
-
-/*
  * 固定のディレクトリ名
  */
 
