@@ -58,11 +58,14 @@ void cleanup_mixer(void)
 
 	for (n = 0; n < MIXER_STREAMS; n++) {
 		stop_sound(n);
-		if (pcm[n] != NULL)
+		if (pcm[n] != NULL) {
 			destroy_wave(pcm[n]);
+			pcm[n] = NULL;
+		}
 	}
 
 	free(bgm_file_name);
+	bgm_file_name = NULL;
 }
 
 /*

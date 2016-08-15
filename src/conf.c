@@ -323,7 +323,10 @@ void cleanup_conf(void)
 	size_t i;
 
 	/* 文字列のプロパティは解放する */
-	for (i = 0; i < RULE_TBL_SIZE; i++)
-		if (rule_tbl[i].type == 's' && rule_tbl[i].val != NULL)
+	for (i = 0; i < RULE_TBL_SIZE; i++) {
+		if (rule_tbl[i].type == 's' && rule_tbl[i].val != NULL) {
 			free(*(char **)rule_tbl[i].val);
+			*(char **)rule_tbl[i].val = NULL;
+		}
+	}
 }

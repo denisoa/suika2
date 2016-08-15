@@ -125,9 +125,15 @@ static bool read_font_file_content(void)
 void cleanup_glyph(void)
 {
 	FT_Done_Face(face);
+	face = NULL;
+
 	FT_Done_FreeType(library);
-	if (font_file_content != NULL)
+	library = NULL;
+
+	if (font_file_content != NULL) {
 		free(font_file_content);
+		font_file_content = NULL;
+	}
 }
 
 /*

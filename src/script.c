@@ -208,7 +208,7 @@ bool move_to_next_command(void)
 /*
  * ラベルへ移動する
  */
-bool move_to_label(const char *UNUSED(label))
+bool move_to_label(const char *label)
 {
 	struct command *c;
 	int i;

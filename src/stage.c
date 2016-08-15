@@ -205,6 +205,8 @@ bool init_stage(void)
 /* 名前ボックスをセットアップする */
 static bool setup_namebox(void)
 {
+	is_namebox_visible = false;
+
 	/* 名前ボックスの画像を読み込む */
 	namebox_image = create_image_from_file(CG_DIR, conf_namebox_file);
 	if (namebox_image == NULL)
@@ -229,6 +231,8 @@ static bool setup_namebox(void)
 /* メッセージボックスをセットアップする */
 static bool setup_msgbox(void)
 {
+	is_msgbox_visible = false;
+
 	/* メッセージボックスの画像を読み込む */
 	msgbox_image = create_image_from_file(CG_DIR, conf_msgbox_file);
 	if (msgbox_image == NULL)
@@ -253,6 +257,8 @@ static bool setup_msgbox(void)
 /* クリックアニメーションをセットアップする */
 static bool setup_click(void)
 {
+	is_click_visible = false;
+
 	/* クリックアニメーションの画像を読み込む */
 	layer_image[LAYER_CLICK] = create_image_from_file(CG_DIR,
 							  conf_click_file);
@@ -269,6 +275,8 @@ static bool setup_click(void)
 /* 選択肢ボックスをセットアップする */
 static bool setup_selbox(void)
 {
+	is_selbox_visible = false;
+
 	/* 選択肢ボックスの画像を読み込む */
 	selbox_bg_image = create_image_from_file(CG_DIR, conf_selbox_bg_file);
 	if (selbox_bg_image == NULL)
@@ -339,11 +347,17 @@ void cleanup_stage(void)
 	int i;
 
 	for (i = LAYER_BG; i < STAGE_LAYERS; i++)
-		if (layer_image[i] != NULL)
-			destroy_image(layer_image[i]);
+		destroy_layer_image(i);
 
-	destroy_image(namebox_image);
-	destroy_image(msgbox_image);
+	if (namebox_image != NULL) {
+		destroy_image(namebox_image);
+		namebox_image = NULL;
+	}
+
+	if (msgbox_image != NULL) {
+		destroy_image(msgbox_image);
+		msgbox_image = NULL;
+	}
 }
 
 /*

@@ -85,11 +85,15 @@ void cleanup_history(void)
 	int i;
 
 	for (i = 0; i < HISTORY_SIZE; i++) {
-		if (history[i].text != NULL)
+		if (history[i].text != NULL) {
 			free(history[i].text);
+			history[i].text = NULL;
+		}
 
-		if (history[i].voice != NULL)
+		if (history[i].voice != NULL) {
 			free(history[i].voice);
+			history[i].voice = NULL;
+		}
 	}
 }
 

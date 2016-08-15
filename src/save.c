@@ -105,6 +105,11 @@ static bool deserialize_vars(struct rfile *rf);
  */
 bool init_save(void)
 {
+	/* 再利用時のための初期化を行う */
+	load_flag = false;
+	restore_flag = false;
+	is_save_mode_enabled = false;
+
 	/* コンフィグからボタンの位置と大きさをロードする */
 	load_button_conf();
 
