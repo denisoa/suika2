@@ -111,6 +111,7 @@ public class MainActivity extends Activity {
 
 		// ビューを作成してセットする
 		view = new MainView(this);
+		view.setBackgroundColor(0xff000000);
 		setContentView(view);
 
 		// JNIコードで初期化処理を実行する
