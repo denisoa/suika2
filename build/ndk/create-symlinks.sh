@@ -41,6 +41,7 @@ ln -sf ../../../../../../src/log.c app/src/main/jni/
 ln -sf ../../../../../../src/main.c app/src/main/jni/
 ln -sf ../../../../../../src/mixer.c app/src/main/jni/
 ln -sf ../../../../../../src/save.c app/src/main/jni/
+ln -sf ../../../../../../src/script.c app/src/main/jni/
 ln -sf ../../../../../../src/stage.c app/src/main/jni/
 ln -sf ../../../../../../src/vars.c app/src/main/jni/
 
