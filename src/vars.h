@@ -20,6 +20,12 @@
  */
 #define VAR_SIZE	(1024)
 
+/* 変数の初期化処理を行う */
+void init_vars(void);
+
+/* 変数の終了処理を行う */
+void cleanup_vars(void);
+
 /* 変数を取得する */
 int32_t get_variable(int index);
 

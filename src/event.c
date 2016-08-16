@@ -24,6 +24,9 @@
  */
 bool on_event_init(void)
 {
+	/* 変数の初期化処理する */
+	init_vars();
+
 	/* 文字レンダリングエンジンの初期化処理を行う */
 	if (!init_glyph())
 		return false;
@@ -64,6 +67,9 @@ void on_event_cleanup(void)
 
 	/* 文字レンダリングエンジンの終了処理を行う */
 	cleanup_glyph();
+
+	/* 変数の終了処理を行う */
+	cleanup_vars();
 }
 
 /*

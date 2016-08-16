@@ -18,6 +18,25 @@
 static int32_t var_tbl[VAR_SIZE];
 
 /*
+ * 変数の初期化処理を行う
+ */
+void init_vars(void)
+{
+	int i;
+
+	/* Androidでは再利用されるので初期化する */
+	for (i = 0; i < VAR_SIZE; i++)
+		var_tbl[i] = 0;
+}
+
+/*
+ * 変数の終了処理を行う
+ */
+void cleanup_vars(void)
+{
+}
+
+/*
  * 変数を取得する
  */
 int32_t get_variable(int index)
