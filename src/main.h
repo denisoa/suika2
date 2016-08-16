@@ -34,11 +34,15 @@ extern int mouse_pos_y;
 /*
  * ゲームループの中身
  */
+
+void init_game_loop();
 bool game_loop_iter();
+void cleanup_game_loop();
 
 /*
  * コマンドの実装
  */
+
 bool message_command(int *x, int *y, int *w, int *h);
 bool bg_command(int *x, int *y, int *w, int *h);
 bool bgm_command(void);
@@ -58,6 +62,7 @@ bool retrospect_command(int *x, int *y, int *w, int *h);
 /*
  * コマンドが終了した直後であるかのチェック
  */
+
 bool check_menu_finish_flag(void);
 bool check_retrospect_finish_flag(void);
 

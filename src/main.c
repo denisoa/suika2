@@ -41,7 +41,27 @@ int mouse_pos_y;
 static bool dispatch_command(int *x, int *y, int *w, int *h);
 
 /*
- * ゲームループの中身
+ * ゲームループの初期化処理を実行する
+ */
+void init_game_loop(void)
+{
+	/* Android NDK用に変数を初期化する */
+	is_left_button_pressed = false;
+	is_right_button_pressed = false;
+	is_return_pressed = false;
+	is_space_pressed = false;
+	is_escape_pressed = false;
+	is_up_pressed = false;
+	is_down_pressed = false;
+	is_page_up_pressed = false;
+	is_page_down_pressed = false;
+	is_control_pressed = false;
+	mouse_pos_x = 0;
+	mouse_pos_y = 0;
+}
+
+/*
+ * ゲームループの中身を実行する
  */
 bool game_loop_iter(int *x, int *y, int *w, int *h)
 {
@@ -155,4 +175,11 @@ static bool dispatch_command(int *x, int *y, int *w, int *h)
 	}
 
 	return true;
+}
+
+/*
+ * ゲームループの終了処理を実行する
+ */
+void cleanup_game_loop(void)
+{
 }

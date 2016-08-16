@@ -38,12 +38,15 @@ bool on_event_init(void)
 	if (!init_stage())
 		return false;
 
-	/* セーブデータ関連の初期化を行う */
+	/* セーブデータの初期化処理を行う */
 	init_save();
 
 	/* 初期スクリプトをロードする */
 	if (!init_script())
 		return false;
+
+	/* ゲームループの初期化処理を行う */
+	init_game_loop();
 
 	return true;
 }
@@ -53,6 +56,9 @@ bool on_event_init(void)
  */
 void on_event_cleanup(void)
 {
+	/* ゲームループの終了処理を行う */
+	cleanup_game_loop();
+
 	/* スクリプトの終了処理を行う */
 	cleanup_script();
 
