@@ -24,6 +24,9 @@
 #define WM_MOUSEWHEEL	0x020A
 #endif
 
+/* ウィンドウタイトルのバッファサイズ */
+#define TITLE_BUF_SIZE	(1024)
+
 /* ログ1行のサイズ */
 #define LOG_BUF_SIZE	(4096)
 
@@ -38,6 +41,9 @@
 
 /* ウィンドウクラス名 */
 static const char szWindowClass[] = "suika";
+
+/* ウィンドウタイトル(ShiftJISに変換後) */
+static char mbszTitle[TITLE_BUF_SIZE];
 
 /* Windowsオブジェクト */
 static HWND hWndMain;
@@ -204,9 +210,10 @@ static BOOL OpenLogFile(void)
 /* ウィンドウを作成する */
 static BOOL InitWindow(HINSTANCE hInstance, int nCmdShow)
 {
+	wchar_t wszTitle[TITLE_BUF_SIZE];
 	WNDCLASSEX wcex;
 	DWORD style;
-	int dw, dh, i;
+	int dw, dh, i, cch;
 
 	/* ディスプレイのサイズが足りない場合 */
 	if(GetSystemMetrics(SM_CXVIRTUALSCREEN) < conf_window_width ||
@@ -243,8 +250,15 @@ static BOOL InitWindow(HINSTANCE hInstance, int nCmdShow)
 	dh = GetSystemMetrics(SM_CYCAPTION) +
 		 GetSystemMetrics(SM_CYFIXEDFRAME) * 2;
 
+	/* ウィンドウのタイトルをUTF-8からShiftJISに変換する */
+	cch = MultiByteToWideChar(CP_UTF8, 0, conf_window_title, -1, wszTitle,
+							  TITLE_BUF_SIZE - 1);
+	wszTitle[cch] = L'\0';
+	WideCharToMultiByte(CP_THREAD_ACP, 0, wszTitle, (int)wcslen(wszTitle),
+						mbszTitle, TITLE_BUF_SIZE - 1, NULL, NULL);
+
 	/* ウィンドウを作成する */
-	hWndMain = CreateWindowEx(0, szWindowClass, conf_window_title, style,
+	hWndMain = CreateWindowEx(0, szWindowClass, mbszTitle, style,
 							  (int)CW_USEDEFAULT, (int)CW_USEDEFAULT,
 							  conf_window_width + dw, conf_window_height + dh,
 							  NULL, NULL, hInstance, NULL);
@@ -402,7 +416,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd,
 		PostQuitMessage(0);
 		return 0;
 	case WM_CLOSE:
-		if (MessageBox(hWnd, "終了しますか？", conf_window_title, MB_OKCANCEL)
+		if (MessageBox(hWnd, "終了しますか？", mbszTitle, MB_OKCANCEL)
 			== IDOK)
 			DestroyWindow(hWnd);
 		return 0;

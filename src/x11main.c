@@ -18,6 +18,7 @@
 #include <X11/Xutil.h>
 #include <X11/xpm.h>
 #include <X11/Xatom.h>
+#include <X11/Xlocale.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>	/* stat(), mkdir() */
@@ -249,6 +250,8 @@ static void close_log_file(void)
 /* ディスプレイをオープンする */
 static bool open_display(void)
 {
+	setlocale(LC_ALL, "");
+
 	display = XOpenDisplay(NULL);
 	if (display == NULL) {
 		printf("Can't open display.\n");
@@ -269,6 +272,7 @@ static bool create_window(void)
 {
 	Window root;
 	XSizeHints *sh;
+	XTextProperty tp;
 	unsigned long black, white;
 	int screen, ret;
 
@@ -290,11 +294,13 @@ static bool create_window(void)
 	}
 
 	/* ウィンドウのタイトルを設定する */
-	ret = XStoreName(display, window, conf_window_title);
-	if (ret == BadAlloc || ret == BadWindow) {
-		log_api_error("XStoreName");
+	ret = XmbTextListToTextProperty(display, &conf_window_title, 1,
+					XCompoundTextStyle, &tp);
+	if (ret == XNoMemory || ret == XLocaleNotSupported) {
+		log_api_error("XmbTextListToTextProperty");
 		return false;
 	}
+	XSetWMName(display, window, &tp);
 
 	/* ウィンドウを表示する */
 	ret = XMapWindow(display, window);
