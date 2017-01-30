@@ -8,6 +8,7 @@
 /*
  * [Changes]
  *  - 2016/06/24 作成
+ *  - 2017/01/30 "\n"対応
  */
 
 #include "suika.h"
@@ -15,6 +16,9 @@
 /* 句読点のUnicodeコードポイント */
 #define CHAR_TOUTEN	(0x3001)
 #define CHAR_KUTEN	(0x3002)
+#define CHAR_BACKSLASH	(0x005c)
+#define CHAR_YENSIGN	(0x00a5)
+#define CHAR_SMALLN	(0x006e)
 
 /* 繰り返し動作中であるか */
 static bool repeatedly;
@@ -64,6 +68,9 @@ static bool restore_flag;
 
 /* メッセージの登録が完了したか */
 static bool is_registered;
+
+/* 文字列がエスケープ中か */
+static bool escaped;
 
 /*
  * 前方参照
@@ -376,6 +383,24 @@ static void draw_msgbox(void)
 		if (mblen == -1) {
 			drawn_chars = total_chars;
 			return;
+		}
+
+		/* エスケープ文字であるとき */
+		if (!escaped && (c == CHAR_BACKSLASH || c == CHAR_YENSIGN)) {
+			escaped = true;
+			msg += mblen;
+			drawn_chars++;
+			continue;
+		}
+
+		/* エスケープされた文字であるとき */
+		if (escaped && c == CHAR_SMALLN) {
+			pen_y += conf_msgbox_margin_line;
+			pen_x = conf_msgbox_margin_left;
+			escaped = false;
+			msg += mblen;
+			drawn_chars++;
+			continue;
 		}
 
 		/* 描画する文字の幅を取得する */
