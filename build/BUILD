@@ -1,22 +1,19 @@
 How to build
 ============
 
-* Windows compilation
-    * Install msys2 and mingw-w64
+* Windows version
+    * On Ubuntu 16.04, install mingw-w64 package.
     * Enter build/mingw32 directory
-    * Run make && make run
+    * Run ./build-libs.sh && make && make run
     * Visual C++ project helps you to debug this software, but the generated code is very slow
 
-* Mac compilation
-    * Install Xcode7 and command line tools
+* Mac version
+    * On Mac OS 10.11, install Xcode7 and command line tools
     * Enter build/cocoa directory
-    * Run make && make run
+    * Run ./build-libs.sh && make && make run
     * Xcode7 project helps you to debug this software
 
-* Linux compilation 
-    * Install Ubuntu 16.04 64bit or 32bit
-    * Enter build/linux64 or build/linux32 directory
-    * Run make && make run
-
-* Library compilation
-    * build-libs.sh builds libraries for use with Suika 2
+* Linux version
+    * On Ubuntu 16.04, install build-essentials package.
+    * Enter build/linux
+    * Run ./build-libs.sh && make && make run

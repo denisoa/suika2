@@ -65,11 +65,8 @@ OBJS = $(SRCS:../../src/%.c=%.o) \
 # Target
 #
 
-suika: $(OBJS) libroot/include/zlib.h
+suika: $(OBJS)
 	$(CC) -o suika $(OBJS) $(LDFLAGS)
-
-libroot/include/zlib.h:
-	./build-libs.sh
 
 #
 # Feature specific source files.
@@ -88,7 +85,7 @@ install: suika
 	cp suika ../../suika2/suika-linux32
 
 clean:
-	rm -rf *~ *.o suika
+	rm -rf *~ *.o suika log.txt sav libroot tmp
 
 erase:
 	rm -rf libroot

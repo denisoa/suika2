@@ -4,6 +4,7 @@ include ../common.mk
 # Toolchain
 #
 
+# For native compilation
 #CC = gcc
 #WINDRES = windres
 
@@ -127,7 +128,7 @@ install: suika.exe
 	cp suika.exe ../../suika2
 
 clean:
-	rm -f *.o suika.exe *~
+	rm -rf *.o *~ suika.exe log.txt sav libroot tmp
 
 erase:
 	rm -rf libroot
