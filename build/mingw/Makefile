@@ -5,12 +5,12 @@ include ../common.mk
 #
 
 # For native compilation
-#CC = gcc
-#WINDRES = windres
+CC = gcc
+WINDRES = windres
 
 # For cross compilation
-CC = i686-w64-mingw32-gcc
-WINDRES = i686-w64-mingw32-windres
+#CC = i686-w64-mingw32-gcc
+#WINDRES = i686-w64-mingw32-windres
 
 #
 # CPPFLAGS

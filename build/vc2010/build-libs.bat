@@ -6,8 +6,8 @@ PATH=%PATH%;C:\msys32\usr\bin
 cd libs
 
 rm -rf zlib
-bsdtar xzfv ../../libsrc\zlib-1.2.8.tar.gz
-mv zlib-1.2.8 zlib
+bsdtar xzfv ../../libsrc\zlib-1.2.11.tar.gz
+mv zlib-1.2.11 zlib
 cd zlib
 sed -i 's/-MD /-MT /' win32\Makefile.msc
 nmake -f win32/Makefile.msc
@@ -15,8 +15,8 @@ cp zlib.lib ../
 cd ..
 
 rm -rf libpng
-bsdtar xzfv ../../libsrc\libpng-1.6.21.tar.gz
-mv libpng-1.6.21 libpng
+bsdtar xzfv ../../libsrc\libpng-1.6.28.tar.gz
+mv libpng-1.6.28 libpng
 cd libpng
 sed -i 's/-MD /-MT /' scripts\makefile.vcwin32
 nmake -f scripts\makefile.vcwin32

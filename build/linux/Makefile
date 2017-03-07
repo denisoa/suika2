@@ -85,7 +85,7 @@ install: suika
 	cp suika ../../suika2/suika-linux64
 
 clean:
-	rm -rf *~ *.o suika log.txt sav libroot tmp
+	rm -rf *~ *.o suika log.txt sav tmp
 
 erase:
 	rm -rf libroot

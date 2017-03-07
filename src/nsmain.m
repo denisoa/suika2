@@ -136,7 +136,6 @@ int main()
 #if !__has_feature(objc_arc)
     [pool release];
 #else
-    (void)timer;
     }
 #endif
 
@@ -273,6 +272,8 @@ static BOOL initWindow(void)
     [theWindow autorelease];
     [theView autorelease];
     [timer autorelease];
+#else
+    (void)timer;
 #endif
 
     return YES;

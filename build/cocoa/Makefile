@@ -102,7 +102,7 @@ install: $(TARGET)
 	cp -R Suika.app ../../suika2/
 
 clean:
-	rm -rf $(TARGET) $(OBJS) *~ log.txt libroot tmp
+	rm -rf $(TARGET) $(OBJS) *~ log.txt sav tmp
 
 erase:
 	rm -rf libroot
