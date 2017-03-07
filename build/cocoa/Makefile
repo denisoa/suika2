@@ -85,9 +85,6 @@ Suika.app/Contents/MacOS/Suika: $(OBJS)
 	mkdir -p Suika.app/Contents/MacOS
 	$(CC) -o $@ $(CFLAGS) $(OBJS) $(LDFLAGS)
 
-libroot/include/zlib.h:
-	./build-libs.sh
-
 #
 # Feature specific compilation rules.
 #
@@ -105,7 +102,7 @@ install: $(TARGET)
 	cp -R Suika.app ../../suika2/
 
 clean:
-	rm -f $(TARGET) $(OBJS) *~
+	rm -rf $(TARGET) $(OBJS) *~ log.txt libroot tmp
 
 erase:
 	rm -rf libroot

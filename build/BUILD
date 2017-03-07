@@ -3,7 +3,7 @@ How to build
 
 * Windows version
     * On Ubuntu 16.04, install mingw-w64 package.
-    * Enter build/mingw32 directory
+    * Enter build/mingw directory
     * Run ./build-libs.sh && make && make run
     * Visual C++ project helps you to debug this software, but the generated code is very slow
 
@@ -17,3 +17,6 @@ How to build
     * On Ubuntu 16.04, install build-essentials package.
     * Enter build/linux
     * Run ./build-libs.sh && make && make run
+
+* Android version
+    * Open build/ndk on Android Studio
