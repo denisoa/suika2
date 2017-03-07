@@ -385,22 +385,28 @@ static void draw_msgbox(void)
 			return;
 		}
 
-		/* エスケープ文字であるとき */
-		if (!escaped && (c == CHAR_BACKSLASH || c == CHAR_YENSIGN)) {
-			escaped = true;
-			msg += mblen;
-			drawn_chars++;
-			continue;
-		}
+		/* エスケープの処理 */
+		if (!escaped) {
+			/* エスケープ文字であるとき */
+			if (c == CHAR_BACKSLASH || c == CHAR_YENSIGN) {
+				escaped = true;
+				msg += mblen;
+				drawn_chars++;
+				continue;
+			}
+		} else if (escaped) {
+			/* エスケープされた文字であるとき */
+			if (c == CHAR_SMALLN) {
+				pen_y += conf_msgbox_margin_line;
+				pen_x = conf_msgbox_margin_left;
+				escaped = false;
+				msg += mblen;
+				drawn_chars++;
+				continue;
+			}
 
-		/* エスケープされた文字であるとき */
-		if (escaped && c == CHAR_SMALLN) {
-			pen_y += conf_msgbox_margin_line;
-			pen_x = conf_msgbox_margin_left;
+			/* 不明なエスケープシーケンスの場合 */
 			escaped = false;
-			msg += mblen;
-			drawn_chars++;
-			continue;
 		}
 
 		/* 描画する文字の幅を取得する */
