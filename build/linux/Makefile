@@ -82,7 +82,7 @@ run: suika
 	cp suika ../../suika2/suika-linux64; cd ../../suika2; ./suika-linux64
 
 install: suika
-	cp suika ../../suika2/suika-linux64
+	cp suika ../../suika2/suika-linux
 
 clean:
 	rm -rf *~ *.o suika log.txt sav tmp

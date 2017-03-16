@@ -103,7 +103,7 @@ install: suika.exe
 	cp suika.exe ../../suika2
 
 clean:
-	rm -rf *.o *~ suika.exe log.txt sav libroot tmp
+	rm -rf *.o *~ suika.exe log.txt sav tmp
 
 erase:
 	rm -rf libroot
