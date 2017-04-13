@@ -9,11 +9,14 @@
  * [Changes]
  *  - 2016/06/24 作成
  *  - 2017/01/30 "\n"対応
+ *  - 2017/04/13 ワードラッピング対応
  */
 
 #include "suika.h"
+#include <ctype.h>
 
-/* 句読点のUnicodeコードポイント */
+/* Unicodeコードポイント */
+#define CHAR_SPACE	(0x0020)
 #define CHAR_TOUTEN	(0x3001)
 #define CHAR_KUTEN	(0x3002)
 #define CHAR_BACKSLASH	(0x005c)
@@ -31,6 +34,9 @@ static int total_chars;
 
 /* 前回までに描画した文字数 */
 static int drawn_chars;
+
+/* スペースの直後であるか */
+static bool is_after_space;
 
 /* 描画位置 */
 static int pen_x;
@@ -83,6 +89,7 @@ static bool play_voice(void);
 static void draw_msgbox(void);
 static int get_frame_chars(void);
 static void draw_click(void);
+static int get_en_word_width(void);
 static bool cleanup(void);
 
 /*
@@ -183,6 +190,9 @@ static bool init(void)
 	/*メッセージの文字数を求める */
 	total_chars = utf8_chars(msg);
 	drawn_chars = 0;
+
+	/* 先頭文字はスペースの直後とみなす */
+	is_after_space = true;
 
 	/* メッセージの描画位置を初期化する */
 	pen_x = conf_msgbox_margin_left;
@@ -378,6 +388,16 @@ static void draw_msgbox(void)
 
 	/* 1文字ずつ描画する */
 	for (i = 0; i < char_count; i++) {
+		/* ワードラッピングを処理する */
+		if (is_after_space) {
+			if (pen_x + get_en_word_width() >= msgbox_w -
+			    conf_msgbox_margin_right) {
+				pen_y += conf_msgbox_margin_line;
+				pen_x = conf_msgbox_margin_left;
+			}
+		}
+		is_after_space = *msg == ' ';
+
 		/* 描画する文字を取得する */
 		mblen = utf8_to_utf32(msg, &c);
 		if (mblen == -1) {
@@ -414,7 +434,7 @@ static void draw_msgbox(void)
 
 		/* メッセージボックスの幅を超える場合、改行する */
 		if ((pen_x + w >= msgbox_w - conf_msgbox_margin_right) &&
-		    (c != CHAR_TOUTEN && c != CHAR_KUTEN)) {
+		    (c != CHAR_SPACE && c != CHAR_TOUTEN && c != CHAR_KUTEN)) {
 			pen_y += conf_msgbox_margin_line;
 			pen_x = conf_msgbox_margin_left;
 		}
@@ -527,6 +547,20 @@ static void draw_click(void)
 	get_click_rect(&click_x, &click_y, &click_w, &click_h);
     union_rect(&draw_x, &draw_y, &draw_w, &draw_h, draw_x, draw_y, draw_w, draw_h,
                click_x, click_y, click_w, click_h);
+}
+
+/* msgが英単語の先頭であれば、その単語の描画幅、それ以外の場合0を返す */
+static int get_en_word_width(void)
+{
+	const char *m;
+	int width;
+
+	m = msg;
+	width = 0;
+	while (isalnum(*m))
+		width += get_glyph_width((unsigned char)*m++);
+
+	return width;
 }
 
 /* 終了処理を行う */
