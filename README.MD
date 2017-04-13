@@ -3,10 +3,10 @@ Suika 2
 
 A Cross-platform Game Engine for Visual Novels
 
-Copyright (C) 2001-2016, TABATA Keiichi. All rights reserved.
+Copyright (C) 2001-2017, TABATA Keiichi. All rights reserved.
 
 * About
-    * Runs on Windows/Mac/Linux/Android
+    * Suika 2 runs on Windows/Mac/Linux/Android
     * Suika 2 doesn't use 2D/3D acceleration (optimized for SIMD)
     * See also http://luxion.jp/s2/
 
