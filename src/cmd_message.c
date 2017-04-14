@@ -17,6 +17,10 @@
 
 /* Unicodeコードポイント */
 #define CHAR_SPACE	(0x0020)
+#define CHAR_COMMA 	(0x002c)
+#define CHAR_PERIOD	(0x002e)
+#define CHAR_COLON	(0x003a)
+#define CHAR_SEMICOLON  (0x003b)
 #define CHAR_TOUTEN	(0x3001)
 #define CHAR_KUTEN	(0x3002)
 #define CHAR_BACKSLASH	(0x005c)
@@ -432,9 +436,14 @@ static void draw_msgbox(void)
 		/* 描画する文字の幅を取得する */
 		w = get_glyph_width(c);
 
-		/* メッセージボックスの幅を超える場合、改行する */
+		/*
+		 * メッセージボックスの幅を超える場合、改行する。
+		 * ただし行頭禁則文字の場合は改行しない。
+		 */
 		if ((pen_x + w >= msgbox_w - conf_msgbox_margin_right) &&
-		    (c != CHAR_SPACE && c != CHAR_TOUTEN && c != CHAR_KUTEN)) {
+		    (c != CHAR_SPACE && c != CHAR_COMMA && c != CHAR_PERIOD &&
+		     c != CHAR_COLON && c != CHAR_SEMICOLON &&
+		     c != CHAR_TOUTEN && c != CHAR_KUTEN)) {
 			pen_y += conf_msgbox_margin_line;
 			pen_x = conf_msgbox_margin_left;
 		}
