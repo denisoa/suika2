@@ -554,8 +554,8 @@ static void draw_click(void)
 
 	/* 描画範囲を求める */
 	get_click_rect(&click_x, &click_y, &click_w, &click_h);
-    union_rect(&draw_x, &draw_y, &draw_w, &draw_h, draw_x, draw_y, draw_w, draw_h,
-               click_x, click_y, click_w, click_h);
+	union_rect(&draw_x, &draw_y, &draw_w, &draw_h, draw_x, draw_y, draw_w,
+		   draw_h, click_x, click_y, click_w, click_h);
 }
 
 /* msgが英単語の先頭であれば、その単語の描画幅、それ以外の場合0を返す */
