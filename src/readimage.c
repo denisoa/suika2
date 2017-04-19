@@ -216,7 +216,7 @@ static bool read_body(void)
 		return false;
 	}
 
-	rows = (png_bytep *)malloc(sizeof(png_bytep) * (size_t)height);
+	rows = malloc(sizeof(png_bytep) * (size_t)height);
 	if (rows == NULL)
 		return false;
 

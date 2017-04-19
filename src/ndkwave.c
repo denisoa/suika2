@@ -9,7 +9,7 @@
 
 /*
  * [Changes]
- * 2003/08/12 作成
+ * 2016/08/12 作成
  */
 
 /*
@@ -38,7 +38,7 @@ struct wave *create_wave_from_file(const char *dir, const char *file,
 
         /* ファイル名を保存する */
 	len = strlen(dir) + 1 + strlen(file) + 1;
-        w->file = (char *)malloc(len);
+        w->file = malloc(len);
         if (w->file == NULL) {
 		log_memory();
 		free(w);

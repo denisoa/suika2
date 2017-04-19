@@ -82,7 +82,7 @@ struct image *create_image(int w, int h)
 	assert(w > 0 && h > 0);
 
 	/* イメージ構造体のメモリを確保する */
-	img = (struct image *)malloc(sizeof(struct image));
+	img = malloc(sizeof(struct image));
 	if (img == NULL) {
 		log_memory();
 		return NULL;
@@ -90,15 +90,15 @@ struct image *create_image(int w, int h)
 
 	/* ピクセル列のメモリを確保する */
 #if !defined(SSE_VERSIONING)
-	pixels = (pixel_t *)malloc((size_t)w * (size_t)h * sizeof(pixel_t));
+	pixels = malloc((size_t)w * (size_t)h * sizeof(pixel_t));
 	if(pixels == NULL) {
 		log_memory();
 		free(img);
 		return NULL;
 	}
 #elif defined(WIN)
-	pixels = (pixel_t*)_aligned_malloc((size_t)w * (size_t)h *
-					   sizeof(pixel_t), SSE_ALIGN);
+	pixels = _aligned_malloc((size_t)w * (size_t)h * sizeof(pixel_t),
+				 SSE_ALIGN);
 	if (pixels == NULL) {
 		log_memory();
 		free(img);
@@ -134,7 +134,7 @@ struct image *create_image_with_pixels(int w, int h, pixel_t *buf)
 	assert(buf != NULL);
 
 	/* イメージ構造体のメモリを確保する */
-	img = (struct image *)malloc(sizeof(struct image));
+	img = malloc(sizeof(struct image));
 	if (img == NULL) {
 		log_memory();
 		return NULL;
