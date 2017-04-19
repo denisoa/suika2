@@ -72,7 +72,7 @@ bool select_command(int *x, int *y, int *w, int *h)
 /*
  * 初期化処理を行う
  */
-bool init(void)
+static bool init(void)
 {
 	/* パラメータを取得する */
 	text[0] = strdup(get_string_param(SELECT_PARAM_TEXT1));
@@ -120,7 +120,7 @@ bool init(void)
 /*
  * 終了処理を行う
  */
-bool cleanup(void)
+static bool cleanup(void)
 {
 	const char *label;
 
@@ -277,5 +277,4 @@ static void draw_text(int y, const char *t)
 		/* 次の文字へ移動する */
 		t += mblen;
 	}
-	
 }
