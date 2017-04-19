@@ -92,7 +92,7 @@ static bool read_font_file_content(void)
 	}
 
 	/* メモリを確保する */
-	font_file_content = (FT_Byte *)malloc((size_t)font_file_size);
+	font_file_content = malloc((size_t)font_file_size);
 	if (font_file_content == NULL) {
 		log_memory();
 		close_rfile(rf);
