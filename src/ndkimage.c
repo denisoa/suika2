@@ -44,7 +44,7 @@ struct image *create_image(int w, int h)
 	jmethodID mid;
 
 	/* image構造体のメモリを確保する */
-	img = (struct image *)malloc(sizeof(struct image));
+	img = malloc(sizeof(struct image));
 	if (img == NULL)
 		return NULL;
 
@@ -74,7 +74,7 @@ struct image *create_image_from_file(const char *dir, const char *file)
 	snprintf(buf, sizeof(buf), "%s/%s", dir, file);
 
 	/* image構造体のメモリを確保する */
-	img = (struct image *)malloc(sizeof(struct image));
+	img = malloc(sizeof(struct image));
 	if (img == NULL)
 		return NULL;
 
